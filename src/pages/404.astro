@@ -1,0 +1,504 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Enhanced Astronaut SVG - More visible and detailed
+const astronautSvg = `
+<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  <!-- Astronaut Body -->
+  <ellipse cx="100" cy="130" rx="50" ry="40" fill="#E8E8E8" stroke="#B0B0B0" stroke-width="4"/>
+  
+  <!-- Astronaut Head/Helmet -->
+  <circle cx="100" cy="75" r="40" fill="#F5F5F5" stroke="#C0C0C0" stroke-width="4"/>
+  
+  <!-- Helmet Glass -->
+  <circle cx="100" cy="75" r="35" fill="rgba(135, 206, 235, 0.3)" stroke="#87CEEB" stroke-width="2"/>
+  
+  <!-- Helmet Reflection -->
+  <ellipse cx="85" cy="65" rx="12" ry="18" fill="rgba(255, 255, 255, 0.8)" opacity="0.9"/>
+  
+  <!-- Face inside helmet -->
+  <circle cx="95" cy="72" r="2" fill="#333"/>
+  <circle cx="105" cy="72" r="2" fill="#333"/>
+  <path d="M 95 82 Q 100 85 105 82" stroke="#333" stroke-width="1.5" fill="none"/>
+  
+  <!-- Arms -->
+  <ellipse cx="65" cy="115" rx="15" ry="35" fill="#E8E8E8" stroke="#B0B0B0" stroke-width="3" transform="rotate(-15 65 115)"/>
+  <ellipse cx="135" cy="115" rx="15" ry="35" fill="#E8E8E8" stroke="#B0B0B0" stroke-width="3" transform="rotate(15 135 115)"/>
+  
+  <!-- Gloves -->
+  <circle cx="58" cy="145" r="12" fill="#D0D0D0" stroke="#A0A0A0" stroke-width="2"/>
+  <circle cx="142" cy="145" r="12" fill="#D0D0D0" stroke="#A0A0A0" stroke-width="2"/>
+  
+  <!-- Legs -->
+  <ellipse cx="85" cy="165" rx="12" ry="35" fill="#E8E8E8" stroke="#B0B0B0" stroke-width="3"/>
+  <ellipse cx="115" cy="165" rx="12" ry="35" fill="#E8E8E8" stroke="#B0B0B0" stroke-width="3"/>
+  
+  <!-- Boots -->
+  <ellipse cx="85" cy="185" rx="10" ry="15" fill="#404040" stroke="#202020" stroke-width="2"/>
+  <ellipse cx="115" cy="185" rx="10" ry="15" fill="#404040" stroke="#202020" stroke-width="2"/>
+  
+  <!-- Chest Control Panel -->
+  <rect x="85" y="115" width="30" height="20" rx="5" fill="#2C2C2C" stroke="#404040" stroke-width="2"/>
+  <circle cx="92" cy="122" r="3" fill="#00FF00"/>
+  <circle cx="100" cy="122" r="3" fill="#FF4444"/>
+  <circle cx="108" cy="122" r="3" fill="#4444FF"/>
+  <rect x="87" y="128" width="26" height="4" rx="2" fill="#00FFFF"/>
+  
+  <!-- Backpack/Life Support -->
+  <rect x="88" y="95" width="24" height="30" rx="12" fill="#606060" stroke="#404040" stroke-width="3"/>
+  <rect x="92" y="100" width="4" height="8" rx="2" fill="#00FF00"/>
+  <rect x="104" y="100" width="4" height="8" rx="2" fill="#FF4444"/>
+  
+  <!-- Antenna -->
+  <line x1="80" y1="50" x2="75" y2="35" stroke="#C0C0C0" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="75" cy="35" r="3" fill="#FF4444"/>
+  
+  <!-- Jetpack Flames (animated) -->
+  <g id="flames">
+    <ellipse cx="92" cy="125" rx="3" ry="12" fill="#FF6600" opacity="0.9"/>
+    <ellipse cx="108" cy="125" rx="3" ry="12" fill="#FF3300" opacity="0.8"/>
+    <ellipse cx="92" cy="130" rx="2" ry="8" fill="#FFFF00" opacity="0.7"/>
+    <ellipse cx="108" cy="130" rx="2" ry="8" fill="#FFFF00" opacity="0.7"/>
+  </g>
+</svg>
+`;
+---
+
+<Layout 
+  title="404 - Page Not Found"
+  description="Oops! It seems you've ventured into uncharted territory."
+>
+  <div class="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden text-center px-4 space-bg">
+    <!-- Dynamic Background for Light/Dark Theme -->
+    <div class="absolute inset-0 -z-10 theme-bg">
+      <!-- Nebula Effects -->
+      <div class="nebula nebula-1"></div>
+      <div class="nebula nebula-2"></div>
+      <div class="nebula nebula-3"></div>
+      <div class="nebula nebula-4"></div>
+    </div>
+
+    <!-- Floating Stars -->
+    <div class="absolute inset-0 pointer-events-none" id="stars-container"></div>
+    
+    <!-- Floating Astronaut with Physics -->
+    <div id="bouncing-astronaut" class="absolute astronaut-container">
+        <Fragment set:html={astronautSvg} />
+    </div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 flex flex-col items-center">
+      <h1 class="text-6xl md:text-8xl font-bold mb-4 tracking-widest glitch-404" data-text="404">404</h1>
+      <h2 class="text-2xl md:text-3xl font-semibold mb-4 space-title">
+        Lost in the Cosmic Void
+      </h2>
+      <p class="text-lg max-w-md mb-8 space-desc">
+        The page you're looking for has drifted into a distant galaxy. Let's navigate you back to familiar space.
+      </p>
+      <a href="/" class="space-btn">
+        🚀 Return to Earth
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  /* Theme-aware Background */
+  .space-bg {
+    background: var(--space-bg);
+    transition: background 0.3s ease;
+  }
+  
+  .theme-bg {
+    background: var(--theme-gradient);
+  }
+  
+  /* Light Theme Variables */
+  :root {
+    --space-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --theme-gradient: 
+      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.2) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.15) 0%, transparent 50%);
+    --text-color: #ffffff;
+    --text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    --star-color: #ffffff;
+    --nebula-opacity: 0.3;
+  }
+  
+  /* Dark Theme Variables */
+  .dark {
+    --space-bg: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 35%, #0f0f23 100%);
+    --theme-gradient: 
+      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.4) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.4) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+    --text-color: #ffffff;
+    --text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    --star-color: #ffffff;
+    --nebula-opacity: 0.5;
+  }
+  
+  /* Light Theme Overrides */
+  .light {
+    --space-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --text-color: #ffffff;
+    --text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    --star-color: rgba(255, 255, 255, 0.9);
+    --nebula-opacity: 0.25;
+  }
+
+  /* Nebula Effects */
+  .nebula {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: var(--nebula-opacity);
+  }
+  
+  .nebula-1 {
+    top: 10%;
+    left: 15%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, #ff6b6b, #4ecdc4);
+    animation: nebula-float 25s ease-in-out infinite;
+  }
+  
+  .nebula-2 {
+    top: 60%;
+    right: 20%;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, #a8e6cf, #88d8c0);
+    animation: nebula-float 30s ease-in-out infinite reverse;
+  }
+  
+  .nebula-3 {
+    bottom: 20%;
+    left: 10%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, #ffd93d, #ff9a9e);
+    animation: nebula-float 35s ease-in-out infinite;
+    animation-delay: -10s;
+  }
+  
+  .nebula-4 {
+    top: 30%;
+    right: 40%;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, #a8edea, #fed6e3);
+    animation: nebula-float 40s ease-in-out infinite reverse;
+    animation-delay: -20s;
+  }
+
+  @keyframes nebula-float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(30px, -20px) scale(1.1); }
+    50% { transform: translate(-20px, 30px) scale(0.9); }
+    75% { transform: translate(20px, 10px) scale(1.05); }
+  }
+
+  /* Astronaut Styling */
+  .astronaut-container {
+    width: 120px;
+    height: 120px;
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+    animation: astronaut-glow 4s ease-in-out infinite;
+  }
+  
+  @keyframes astronaut-glow {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5)); }
+    50% { filter: drop-shadow(0 0 35px rgba(0, 255, 255, 0.8)); }
+  }
+  
+  /* Jetpack Flame Animation */
+  #flames {
+    animation: flame-flicker 0.3s ease-in-out infinite alternate;
+  }
+  
+  @keyframes flame-flicker {
+    0% { transform: scaleY(1); }
+    100% { transform: scaleY(1.2); }
+  }
+
+  /* Enhanced Glitch Effect for 404 */
+  .glitch-404 {
+    position: relative;
+    color: var(--text-color);
+    text-shadow: var(--text-shadow);
+    font-weight: 900;
+    animation: glitch-shake 2s infinite;
+  }
+  
+  .glitch-404::before,
+  .glitch-404::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .glitch-404::before {
+    animation: glitch-red 3s infinite;
+    color: #ff0040;
+    z-index: -1;
+  }
+  
+  .glitch-404::after {
+    animation: glitch-blue 2.5s infinite;
+    color: #00ffff;
+    z-index: -2;
+  }
+  
+  @keyframes glitch-shake {
+    0%, 90%, 100% { transform: translate(0); }
+    10% { transform: translate(-1px, 1px); }
+    20% { transform: translate(1px, -1px); }
+    30% { transform: translate(-1px, -1px); }
+    40% { transform: translate(1px, 1px); }
+    50% { transform: translate(-1px, 1px); }
+    60% { transform: translate(1px, -1px); }
+    70% { transform: translate(-1px, -1px); }
+    80% { transform: translate(1px, 1px); }
+  }
+  
+  @keyframes glitch-red {
+    0%, 90%, 100% { 
+      transform: translate(0);
+      clip-path: inset(0 0 0 0);
+    }
+    5% { 
+      transform: translate(-2px, 2px);
+      clip-path: inset(10% 0 85% 0);
+    }
+    10% { 
+      transform: translate(2px, -2px);
+      clip-path: inset(80% 0 10% 0);
+    }
+    15% { 
+      transform: translate(-2px, 2px);
+      clip-path: inset(40% 0 40% 0);
+    }
+    20% { 
+      transform: translate(2px, -2px);
+      clip-path: inset(60% 0 25% 0);
+    }
+    25% { 
+      transform: translate(-2px, 2px);
+      clip-path: inset(20% 0 60% 0);
+    }
+  }
+  
+  @keyframes glitch-blue {
+    0%, 90%, 100% { 
+      transform: translate(0);
+      clip-path: inset(0 0 0 0);
+    }
+    7% { 
+      transform: translate(2px, -2px);
+      clip-path: inset(5% 0 90% 0);
+    }
+    14% { 
+      transform: translate(-2px, 2px);
+      clip-path: inset(70% 0 15% 0);
+    }
+    21% { 
+      transform: translate(2px, -2px);
+      clip-path: inset(25% 0 60% 0);
+    }
+    28% { 
+      transform: translate(-2px, 2px);
+      clip-path: inset(50% 0 35% 0);
+    }
+    35% { 
+      transform: translate(2px, -2px);
+      clip-path: inset(15% 0 70% 0);
+    }
+  }
+
+  /* Typography */
+  .space-title {
+    color: var(--text-color);
+    text-shadow: var(--text-shadow);
+    animation: title-glow 3s ease-in-out infinite;
+  }
+  
+  .space-desc {
+    color: var(--text-color);
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  }
+  
+  @keyframes title-glow {
+    0%, 100% { text-shadow: var(--text-shadow); }
+    50% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+  }
+
+  /* Space Button */
+  .space-btn {
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 
+      0 5px 15px rgba(102, 126, 234, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    animation: btn-pulse 2s ease-in-out infinite;
+  }
+  
+  .space-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 
+      0 15px 35px rgba(102, 126, 234, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    animation: none;
+  }
+  
+  @keyframes btn-pulse {
+    0%, 100% { box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
+    50% { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3); }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .glitch-404 {
+      font-size: 4rem;
+    }
+    
+    .astronaut-container {
+      width: 80px;
+      height: 80px;
+    }
+    
+    .nebula-1, .nebula-2, .nebula-3, .nebula-4 {
+      width: 150px;
+      height: 150px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const starsContainer = document.getElementById('stars-container');
+    const astronaut = document.getElementById('bouncing-astronaut');
+
+    // Create Enhanced Star Field
+    if (starsContainer) {
+      const starCount = 150;
+      
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        const size = Math.random() * 4 + 1;
+        const brightness = Math.random() * 0.8 + 0.2;
+        const hue = Math.random() * 60 + 180; // Blue to cyan range
+        
+        star.style.position = 'absolute';
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.borderRadius = '50%';
+        star.style.backgroundColor = `hsl(${hue}, 70%, 80%)`;
+        star.style.opacity = String(brightness);
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.boxShadow = `0 0 ${size * 2}px currentColor`;
+        
+        // Twinkling animation
+        const duration = Math.random() * 4 + 2;
+        const delay = Math.random() * 5;
+        
+        star.animate([
+          { opacity: brightness, transform: 'scale(1)' },
+          { opacity: brightness * 0.3, transform: 'scale(0.5)' },
+          { opacity: brightness, transform: 'scale(1)' }
+        ], {
+          duration: duration * 1000,
+          delay: delay * 1000,
+          iterations: Infinity,
+          easing: 'ease-in-out'
+        });
+        
+        starsContainer.appendChild(star);
+      }
+    }
+
+    // Enhanced Astronaut Physics Animation
+    if (astronaut) {
+      const container = astronaut.parentElement;
+      let x = Math.random() * (window.innerWidth - 120);
+      let y = Math.random() * (window.innerHeight - 120);
+      let vx = (Math.random() - 0.5) * 4;
+      let vy = (Math.random() - 0.5) * 4;
+      let rotation = 0;
+      let rotationSpeed = (Math.random() - 0.5) * 2;
+      
+      // Physics constants
+      const gravity = 0.05;
+      const friction = 0.995;
+      const bounce = 0.7;
+      const maxSpeed = 6;
+      
+      function animate() {
+        // Apply gravity
+        vy += gravity;
+        
+        // Apply friction
+        vx *= friction;
+        vy *= friction;
+        
+        // Limit speed
+        const speed = Math.sqrt(vx * vx + vy * vy);
+        if (speed > maxSpeed) {
+          vx = (vx / speed) * maxSpeed;
+          vy = (vy / speed) * maxSpeed;
+        }
+        
+        // Update position
+        x += vx;
+        y += vy;
+        rotation += rotationSpeed;
+        
+        // Boundary handling with wrapping
+        const containerWidth = window.innerWidth;
+        const containerHeight = window.innerHeight;
+        const size = 120;
+        
+        // Horizontal wrapping
+        if (x > containerWidth + 50) {
+          x = -50;
+          vx = Math.abs(vx) * 0.8;
+        } else if (x < -50) {
+          x = containerWidth + 50;
+          vx = -Math.abs(vx) * 0.8;
+        }
+        
+        // Vertical bouncing
+        if (y > containerHeight - size) {
+          y = containerHeight - size;
+          vy *= -bounce;
+          vx += (Math.random() - 0.5) * 1;
+          rotationSpeed = (Math.random() - 0.5) * 4;
+        } else if (y < 0) {
+          y = 0;
+          vy *= -bounce;
+          vx += (Math.random() - 0.5) * 1;
+          rotationSpeed = (Math.random() - 0.5) * 4;
+        }
+        
+        // Apply transform
+        astronaut.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
+        
+        requestAnimationFrame(animate);
+      }
+      
+      animate();
+    }
+  });
+</script>

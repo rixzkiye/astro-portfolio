@@ -1,0 +1,329 @@
+---
+// src/components/SearchFilter.astro
+import ProjectCard from './ProjectCard.astro';
+import PaperCard from './PaperCard.astro';
+import type { CollectionEntry } from 'astro:content';
+import type { ProjectFrontmatter } from '../content/config';
+import type { PaperFrontmatter } from '../content/config';
+
+// A type guard to check if an item is a project
+function isProject(item: CollectionEntry<'projects'> | CollectionEntry<'papers'>): item is CollectionEntry<'projects'> {
+  return item.collection === 'projects';
+}
+
+interface Category {
+ key: string;
+ name: string;
+ icon: string;
+}
+
+interface EmptyDialog {
+  icon: string;
+  title: string;
+  message: string;
+}
+
+export interface Props {
+ items: CollectionEntry<'projects'>[] | CollectionEntry<'papers'>[];
+ itemType: 'project' | 'paper';
+ placeholder: string;
+ categories: Category[];
+ allText: string;
+  emptyDialog?: EmptyDialog;
+}
+
+const { items, itemType, placeholder, categories, allText, emptyDialog } = Astro.props;
+
+const iconSvg = itemType === 'project'
+ ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>`
+ : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
+---
+
+<!-- Search and Filter UI -->
+<section class="py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto text-center">
+    <h1 class="text-4xl md:text-6xl font-bold text-light-text dark:text-dark-text mb-6">
+      {itemType === 'project' ? 'Creative' : 'Written'} <span class="text-gradient">{itemType === 'project' ? 'Projects' : 'Works'}</span>
+    </h1>
+    <p class="text-xl text-light-muted dark:text-dark-muted max-w-2xl mx-auto mb-10">
+      {itemType === 'project' 
+        ? 'A collection of my work spanning technology, music, and visual media.' 
+        : 'A collection of my thoughts, reflections, and creative expressions.'
+      }
+    </p>
+    
+    <div id="search-container" class="relative max-w-2xl mx-auto z-50">
+      <div class="relative flex items-center w-full">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+          <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+        <input
+          type="text"
+          id="search-input"
+          placeholder={placeholder}
+          class="w-full pl-12 pr-12 sm:pr-4 py-3 rounded-lg border border-light-border/50 dark:border-dark-border/50 bg-light-surface/50 dark:bg-dark-surface/50 backdrop-blur-sm focus:ring-2 focus:ring-light-accent dark:focus:ring-dark-accent focus:outline-none transition-all"
+          autocomplete="off"
+        />
+        <!-- Mobile Filter Button -->
+        <div class="sm:hidden absolute inset-y-0 right-0 flex items-center">
+            <button id="mobile-filter-toggle" class="p-2 mr-1 rounded-full hover:bg-light-border dark:hover:bg-dark-border transition-colors relative">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                <div id="mobile-filter-indicator" class="absolute top-1 right-1 w-2.5 h-2.5 bg-light-accent dark:bg-dark-accent rounded-full hidden border-2 border-light-surface dark:border-dark-surface"></div>
+            </button>
+        </div>
+      </div>
+      <!-- Search Results Preview -->
+      <div id="search-results-preview" class="absolute top-full left-0 right-0 mt-2 bg-light-surface/80 dark:bg-dark-surface/80 backdrop-blur-md border border-light-border/50 dark:border-dark-border/50 rounded-lg shadow-2xl overflow-hidden text-left transition-all duration-200 ease-in-out opacity-0 scale-95 pointer-events-none z-90"></div>
+      <!-- Mobile Filter Dropdown -->
+      <div id="mobile-filter-dropdown" class="absolute top-full right-0 mt-2 w-64 bg-light-surface/80 dark:bg-dark-surface/80 backdrop-blur-md border border-light-border/50 dark:border-dark-border/50 rounded-lg shadow-2xl p-4 transition-all duration-300 ease-in-out opacity-0 scale-95 -translate-y-2 pointer-events-none z-[100]">
+        <p class="text-sm font-semibold text-left mb-3 px-2 text-light-text dark:text-dark-text">Filter by category</p>
+        <div id="mobile-filter-options" class="flex flex-col gap-1">
+            <button class="mobile-filter-btn" data-category="all">{allText}</button>
+            {categories.map(category => (
+                <button class="mobile-filter-btn" data-category={category.key}>{category.icon} {category.name}</button>
+            ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Wrapper for Content & Filter -->
+<div id="content-wrapper" class="px-4 sm:px-6 lg:px-8">
+    <!-- Desktop Filter Tabs -->
+    <section id="desktop-filter-section" class="mb-12 transition-all duration-300">
+      <div class="max-w-7xl mx-auto">
+        <div id="main-filter-tabs" class="hidden sm:flex flex-wrap justify-center gap-4">
+          <button class="filter-btn px-6 py-3 rounded-lg border transition-all duration-200 font-medium" data-category="all">
+            {allText}
+          </button>
+          {categories.map(category => (
+            <button class="filter-btn px-6 py-3 rounded-lg border transition-all duration-200 font-medium" data-category={category.key}>
+              <span class="mr-2">{category.icon}</span>
+              {category.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Content Grid -->
+    <section class="pb-20">
+      <div class="max-w-7xl mx-auto">
+        <div id="content-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {items.map((item, index) => {
+              const searchableContent = `${item.data.title} ${item.data.description} ${item.data.tags?.join(" ")}`.toLowerCase();
+              const href = `/${item.collection}/${item.slug}`;
+              
+              const projectProps = isProject(item) ? { ...item.data, slug: item.slug } : null;
+              const paperProps = !isProject(item) ? { ...item.data, slug: item.slug } : null;
+
+              return (
+                <div
+                  class="content-item"
+                  style={`--animation-delay: ${index * 75}ms;`}
+                  data-category={item.data.category}
+                  data-searchable-content={searchableContent}
+                  data-title={item.data.title}
+                  data-description={item.data.description}
+                  data-href={href}
+                >
+                  {itemType === 'project' && projectProps ? <ProjectCard {...projectProps} /> : null}
+                  {itemType === 'paper' && paperProps ? <PaperCard {...paperProps} /> : null}
+                </div>
+              );
+          })}
+        </div>
+        <div id="empty-category-dialog" class="hidden text-center py-20">
+            <div id="empty-category-icon" class="text-6xl mb-4 animate-bounce"></div>
+            <h2 id="empty-category-title" class="text-2xl font-bold"></h2>
+            <p id="empty-category-message" class="text-light-muted dark:text-dark-muted mt-2"></p>
+        </div>
+        <div id="no-results" class="hidden text-center py-20">
+          <div class="text-6xl mb-4 animate-pulse">🤷</div>
+          <h2 class="text-2xl font-bold">No Results Found</h2>
+          <p class="text-light-muted dark:text-dark-muted">Try using different keywords or filters.</p>
+        </div>
+      </div>
+    </section>
+</div>
+
+<style is:global>
+ @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+ .content-item { animation: fadeInUp 0.6s ease-out forwards; animation-delay: var(--animation-delay, 0ms); opacity: 0; }
+ .content-item.hidden { display: none; }
+ mark { background-color: var(--color-accent-transparent); color: var(--color-accent); padding: 1px 2px; border-radius: 3px; }
+ #search-results-preview.visible, #mobile-filter-dropdown.visible { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+ .preview-item { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; transition: background-color 0.2s ease-in-out; text-decoration: none; color: inherit; }
+ .preview-item:hover { background-color: rgba(var(--color-accent-rgb), 0.1); }
+ .preview-item:not(:last-child) { border-bottom: 1px solid var(--color-border); }
+ .preview-item__icon { flex-shrink: 0; width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; display: grid; place-items: center; background-color: rgba(var(--color-accent-rgb), 0.08); }
+ .preview-item__icon svg { width: 1.25rem; height: 1.25rem; color: var(--color-accent); }
+ .preview-item__content { flex-grow: 1; overflow: hidden; }
+ .preview-item__title { font-weight: 600; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ .preview-item__desc { font-size: 0.875rem; color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ .mobile-filter-btn { width: 100%; text-align: left; padding: 0.5rem 0.75rem; border-radius: 0.375rem; transition: background-color 0.2s, color 0.2s; font-weight: 500; color: var(--color-text-muted); }
+ .mobile-filter-btn:hover { background-color: rgba(var(--color-accent-rgb), 0.1); color: var(--color-text); }
+ .mobile-filter-btn.active { background-color: var(--color-accent); color: white; font-weight: 600; }
+</style>
+
+<script is:inline define:vars={{ iconSvg, emptyDialog }}>
+ document.addEventListener("DOMContentLoaded", () => {
+  const searchContainer = document.getElementById("search-container");
+  const searchInput = document.getElementById("search-input");
+  const searchResultsPreview = document.getElementById("search-results-preview");
+  const desktopFilterSection = document.getElementById("desktop-filter-section");
+  const mainFilterTabs = document.getElementById("main-filter-tabs");
+  const mobileFilterToggle = document.getElementById("mobile-filter-toggle");
+  const mobileFilterDropdown = document.getElementById("mobile-filter-dropdown");
+  const mobileFilterOptions = document.getElementById("mobile-filter-options");
+  const mobileFilterIndicator = document.getElementById("mobile-filter-indicator");
+  const contentWrapper = document.getElementById("content-wrapper");
+  const contentGrid = document.getElementById("content-grid");
+  const contentItems = document.querySelectorAll(".content-item");
+  const noResultsDialog = document.getElementById("no-results");
+  const emptyCategoryDialogEl = document.getElementById("empty-category-dialog");
+  const emptyCategoryIcon = document.getElementById("empty-category-icon");
+  const emptyCategoryTitle = document.getElementById("empty-category-title");
+  const emptyCategoryMessage = document.getElementById("empty-category-message");
+
+  if (!searchContainer || !searchInput || !mainFilterTabs || !mobileFilterToggle || !contentGrid || !contentWrapper) return;
+
+  let currentCategory = "all";
+  let currentSearch = "";
+  const searchableData = Array.from(contentItems).map(item => ({
+   title: item.dataset.title ?? '',
+   description: item.dataset.description ?? '',
+   searchableContent: item.dataset.searchableContent ?? '',
+   href: item.dataset.href ?? '#',
+   element: item,
+  }));
+
+  const highlightText = (text, query) => {
+   if (!query || !text) return text;
+   const regex = new RegExp(`(${query.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")})`, "gi");
+   return text.replace(regex, `<mark>$1</mark>`);
+  };
+
+  const applyFilters = () => {
+   let visibleCount = 0;
+   let itemsInCategory = 0;
+   contentItems.forEach(item => {
+    const itemCategory = item.dataset.category ?? '';
+    const isInCategory = currentCategory === 'all' || itemCategory === currentCategory;
+    if (isInCategory) itemsInCategory++;
+    const searchMatch = !currentSearch || (item.dataset.searchableContent ?? '').includes(currentSearch);
+    const showItem = isInCategory && searchMatch;
+    item.classList.toggle("hidden", !showItem);
+    if (showItem) visibleCount++;
+   });
+   
+   const isSearching = currentSearch.length > 0;
+   desktopFilterSection?.classList.toggle('hidden', isSearching);
+   
+   const showNoResults = isSearching && visibleCount === 0;
+   const showEmptyCategory = !isSearching && itemsInCategory === 0 && currentCategory !== 'all';
+
+      contentGrid?.classList.toggle('hidden', showEmptyCategory || showNoResults);
+   noResultsDialog?.classList.toggle("hidden", !showNoResults);
+   emptyCategoryDialogEl?.classList.toggle("hidden", !showEmptyCategory);
+
+   if (showEmptyCategory) {
+        const categoryButton = mainFilterTabs.querySelector(`button[data-category="${currentCategory}"]`);
+        if (categoryButton && emptyCategoryIcon && emptyCategoryTitle && emptyCategoryMessage) {
+            if (emptyDialog) {
+                emptyCategoryIcon.innerText = emptyDialog.icon;
+                emptyCategoryTitle.innerText = emptyDialog.title;
+                emptyCategoryMessage.innerText = emptyDialog.message;
+            } else {
+                const categoryName = categoryButton.innerText.trim().split('\n')[0] || categoryButton.innerText.trim();
+                const icon = categoryButton.querySelector('span')?.innerText ?? '🤷';
+                emptyCategoryIcon.innerText = icon;
+                emptyCategoryTitle.innerText = `${categoryName} Content Coming Soon`;
+                emptyCategoryMessage.innerText = `Sorry, we are currently creating some exciting ${categoryName.toLowerCase()} content. Please check back later!`;
+            }
+        }
+      }
+  };
+
+  const updateSearchPreview = () => {
+   if (!searchResultsPreview) return;
+   const query = searchInput.value.toLowerCase();
+   if (query.length < 2) {
+    searchResultsPreview.classList.remove("visible");
+    return;
+   }
+   const filteredResults = searchableData.filter(item => item.searchableContent.includes(query)).slice(0, 5);
+   if (filteredResults.length > 0) {
+    searchResultsPreview.innerHTML = filteredResults.map(item =>
+     `<a href="${item.href}" class="preview-item"><div class="preview-item__icon">${iconSvg}</div><div class="preview-item__content"><div class="preview-item__title">${highlightText(item.title, query)}</div><div class="preview-item__desc">${item.description}</div></div></a>`
+    ).join("");
+    searchResultsPreview.classList.add("visible");
+   } else {
+    searchResultsPreview.classList.remove("visible");
+   }
+  };
+
+  const updateActiveButton = (activeCategory) => {
+    const filterBtns = mainFilterTabs.querySelectorAll('button');
+    const mobileBtns = mobileFilterOptions.querySelectorAll('button');
+    const activeClasses = ['bg-light-accent', 'dark:bg-dark-accent', 'text-white', 'border-transparent'];
+    const inactiveClasses = ['border-light-border', 'dark:border-dark-border', 'text-light-text', 'dark:text-dark-text', 'hover:bg-light-surface', 'dark:hover:bg-dark-surface'];
+    
+    filterBtns.forEach(btn => {
+      btn.classList.remove(...activeClasses, ...inactiveClasses);
+      btn.classList.add(...(btn.dataset.category === activeCategory ? activeClasses : inactiveClasses));
+    });
+    mobileBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.category === activeCategory);
+    });
+    mobileFilterIndicator?.classList.toggle('hidden', activeCategory === 'all');
+  };
+
+  const handleFilterChange = (category) => {
+    currentCategory = category;
+    if (searchInput) searchInput.value = '';
+    currentSearch = '';
+    updateActiveButton(currentCategory);
+    applyFilters();
+    mobileFilterDropdown?.classList.remove('visible');
+  };
+
+  mainFilterTabs.addEventListener('click', (e) => {
+    const target = e.target.closest('button');
+    if (target) handleFilterChange(target.dataset.category ?? 'all');
+  });
+
+  mobileFilterToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    mobileFilterDropdown?.classList.toggle('visible');
+  });
+
+  mobileFilterOptions.addEventListener('click', (e) => {
+    const target = e.target.closest('button');
+    if (target) handleFilterChange(target.dataset.category ?? 'all');
+  });
+
+  searchInput.addEventListener("input", () => {
+   currentSearch = searchInput.value.toLowerCase();
+   applyFilters();
+   updateSearchPreview();
+  });
+  
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      searchResultsPreview?.classList.remove('visible');
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+   if (e.target instanceof Node && !searchContainer.contains(e.target)) {
+    searchResultsPreview?.classList.remove("visible");
+    mobileFilterDropdown?.classList.remove('visible');
+   }
+  });
+
+  updateActiveButton('all');
+  applyFilters();
+ });
+</script>

@@ -1,0 +1,25 @@
+nohup: ignoring input
+02:34:01 [types] Generated 1ms
+02:34:02 [content] Syncing content
+02:34:02 [content] Synced content
+
+ astro  v5.10.2 ready in 1142 ms
+
+┃ Local    http://localhost:4321/
+┃ Network  http://169.254.0.21:4321/
+
+02:34:02 watching for file changes...
+02:34:33 [200] / 1071ms
+Papers found: 2
+Paper: esai/esai/digital-minimalism
+Paper: puisi/puisi/digital-solitude
+02:34:41 [WARN] [router] A `getStaticPaths()` route pattern was matched, but no matching static path was found for requested path `/papers/esai/digital-minimalism`.
+
+Possible dynamic routes being matched: src/pages/papers/[category]/[slug].astro.
+02:34:41 [404] HEAD /papers/esai/digital-minimalism 2ms
+02:34:49 [200] /papers 17ms
+Papers found: 2
+Paper: esai/esai/digital-minimalism
+Paper: puisi/puisi/digital-solitude
+02:35:25 [200] HEAD /papers/esai/digital-minimalism 346ms
+02:35:34 [200] HEAD /projects/code/portfolio-website 14ms

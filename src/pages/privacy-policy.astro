@@ -1,0 +1,62 @@
+---
+import { getEntry } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+const policy = await getEntry('pages', 'privacy-policy');
+
+// Jika halaman 'privacy-policy' tidak ditemukan di dalam src/content/pages,
+// lempar error yang jelas saat proses build. Ini lebih baik daripada error saat runtime.
+if (!policy) {
+  throw new Error(
+    'Halaman "privacy-policy" tidak ditemukan. Pastikan file `src/content/pages/privacy-policy.md` ada.'
+  );
+}
+
+const { Content } = await policy.render();
+---
+<Layout title={policy.data.title} description={policy.data.description}>
+  <!-- Hero Section -->
+  <section class="py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-4xl md:text-5xl font-bold text-light-text dark:text-dark-text mb-4">
+        🛡️ {policy.data.title}
+      </h1>
+      <p class="text-xl text-light-muted dark:text-dark-muted max-w-2xl mx-auto">
+        Kami menghargai privasi Anda. Halaman ini menjelaskan bagaimana kami mengelola data dan menjaga keamanan informasi Anda.
+      </p>
+      <p class="mt-2 text-sm text-light-muted dark:text-dark-muted">
+        Last updated: July 11, 2025
+      </p>
+    </div>
+  </section>
+
+  <!-- Highlight Box -->
+  <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 dark:border-yellow-400 p-4 mb-12 mx-4 sm:mx-6 lg:mx-8 rounded-r-lg">
+    <p class="text-yellow-900 dark:text-yellow-200 text-sm text-center">
+      ⚠️ Harap baca dengan saksama. Dengan menggunakan layanan kami, Anda menyetujui kebijakan privasi ini.
+    </p>
+  </div>
+
+  <!-- Markdown Content -->
+  <article class="px-4 sm:px-6 lg:px-8 pb-20">
+    <div class="max-w-4xl mx-auto prose prose-lg dark:prose-invert max-w-none">
+      <Content />
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="max-w-4xl mx-auto mt-12 pt-8 border-t border-light-border dark:border-dark-border flex justify-between items-center">
+      <a 
+        href="/projects" 
+        class="text-light-accent dark:text-dark-accent hover:underline"
+      >
+        ← Kembali ke Proyek
+      </a>
+      <a 
+        href="/pages/terms"
+        class="text-light-accent dark:text-dark-accent hover:underline"
+      >
+        Syarat Penggunaan →
+      </a>
+    </nav>
+  </article>
+</Layout>

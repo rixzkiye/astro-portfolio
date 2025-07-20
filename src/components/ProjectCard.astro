@@ -1,0 +1,69 @@
+  ---
+  import { ExternalLink, Github, Youtube, Music } from "lucide-react";
+
+  export interface Props {
+    title: string;
+    description: string;
+    thumbnail: string;
+    category: "code" | "music" | "video";
+    tags: string[];
+    slug: string;
+    externalLink?: string;
+    githubLink?: string;
+    youtubeLink?: string;
+    spotifyLink?: string;
+    featured?: boolean;
+  }
+
+  const { title, description, thumbnail, category, tags, slug, externalLink, githubLink, youtubeLink, spotifyLink, featured = false } = Astro.props;
+
+  const categoryColors = {
+    code: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+    music: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+    video: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+  };
+
+  const categoryIcons = { code: "💻", music: "🎵", video: "🎬" };
+  ---
+
+  <article class={`p-6 bg-light-surface dark:bg-dark-surface rounded-xl border border-light-border dark:border-dark-border flex flex-col h-full group transition-all duration-300 hover:border-light-accent dark:hover:border-dark-accent hover:shadow-lg hover:shadow-light-accent/5 dark:hover:shadow-dark-accent/5 ${featured ? "ring-2 ring-light-accent dark:ring-dark-accent" : ""}`}>
+    <!-- Thumbnail -->
+    <div class="relative overflow-hidden rounded-lg mb-4">
+      <a href={`/projects/${slug}`}>
+        <img src={thumbnail} alt={title} class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300" loading="lazy" />
+      </a>
+      <div class="absolute top-3 left-3"><span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${categoryColors[category]}`}><span class="mr-1.5">{categoryIcons[category]}</span>{category}</span></div>
+      {featured && <div class="absolute top-3 right-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-accent text-white dark:bg-dark-accent">⭐ Featured</span></div>}
+    </div>
+
+    <!-- Konten Utama -->
+    <div class="flex-grow flex flex-col space-y-3">
+      <h3 class="text-xl font-semibold text-light-text dark:text-dark-text group-hover:text-light-accent dark:group-hover:text-dark-accent transition-colors">
+        <a href={`/projects/${slug}`} class="hover:underline">{title}</a>
+      </h3>
+      <p class="text-light-muted dark:text-dark-muted text-sm line-clamp-3">{description}</p>
+      
+      <!-- Spacer untuk mendorong konten ke bawah -->
+      <div class="flex-grow"></div>
+      
+      <!-- Tags -->
+      <div class="flex flex-wrap gap-2 pt-2">
+        {tags.slice(0, 3).map((tag) => <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-light-border dark:bg-dark-border text-light-text dark:text-dark-text">#{tag}</span>)}
+        {tags.length > 3 && <span class="text-xs text-light-muted dark:text-dark-muted self-center">+{tags.length - 3} lagi</span>}
+      </div>
+    </div>
+
+    <!-- Tautan Aksi -->
+    <div class="flex items-center justify-between pt-4 mt-4 border-t border-light-border dark:border-dark-border">
+      <a href={`/projects/${slug}`} class="text-light-accent dark:text-dark-accent hover:underline text-sm font-medium flex items-center group-hover:gap-2 transition-all duration-300">
+        Lihat Detail
+        <span class="transition-transform duration-300 group-hover:translate-x-1">→</span>
+      </a>
+      <div class="flex items-center space-x-1">
+        {externalLink && <a href={externalLink} target="_blank" rel="noopener noreferrer" class="p-2 text-light-muted dark:text-dark-muted hover:text-light-accent dark:hover:text-dark-accent transition-colors" aria-label="External Link"><ExternalLink className="w-4 h-4" /></a>}
+        {githubLink && <a href={githubLink} target="_blank" rel="noopener noreferrer" class="p-2 text-light-muted dark:text-dark-muted hover:text-light-accent dark:hover:text-dark-accent transition-colors" aria-label="GitHub"><Github className="w-4 h-4" /></a>}
+        {youtubeLink && <a href={youtubeLink} target="_blank" rel="noopener noreferrer" class="p-2 text-light-muted dark:text-dark-muted hover:text-red-500 transition-colors" aria-label="YouTube"><Youtube className="w-4 h-4" /></a>}
+        {spotifyLink && <a href={spotifyLink} target="_blank" rel="noopener noreferrer" class="p-2 text-light-muted dark:text-dark-muted hover:text-green-500 transition-colors" aria-label="Spotify"><Music className="w-4 h-4" /></a>}
+      </div>
+    </div>
+  </article>

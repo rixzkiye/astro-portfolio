@@ -1,0 +1,115 @@
+---
+// src/components/cards/BaseCard.astro
+import { ExternalLink, Github, Youtube, Music, FileText, Clock, Eye } from 'lucide-react';
+
+export interface Props {
+  slug: string;
+  title: string;
+  description: string;
+  thumbnail?: string;
+  category: string;
+  categoryIcon?: string;
+  categoryColorClass: string;
+  tags: string[];
+  featured?: boolean;
+  href: string; // URL tujuan utama kartu
+  viewMode?: 'grid' | 'list'; // Prop baru untuk mode tampilan
+}
+
+const { 
+  slug, 
+  title, 
+  description, 
+  thumbnail, 
+  category, 
+  categoryIcon,
+  categoryColorClass,
+  tags, 
+  featured = false,
+  href,
+  viewMode = 'grid' // Default ke grid
+} = Astro.props;
+
+// Logika untuk menentukan layout berdasarkan viewMode
+const isGridMode = viewMode === 'grid';
+const articleClasses = [
+  'group', 'transition-all', 'duration-300', 'bg-light-surface', 'dark:bg-dark-surface',
+  'border', 'border-light-border', 'dark:border-dark-border', 'rounded-xl',
+  'hover:border-light-accent', 'dark:hover:border-dark-accent', 'hover:shadow-lg',
+  'hover:shadow-light-accent/5', 'dark:hover:shadow-dark-accent/5',
+  featured ? 'ring-2 ring-light-accent dark:ring-dark-accent' : '',
+  isGridMode ? 'p-6 flex flex-col h-full' : 'p-4 flex flex-row items-center gap-4 w-full' // Perubahan layout
+].join(' ');
+
+const thumbnailContainerClasses = isGridMode ? 'relative overflow-hidden rounded-lg mb-4' : 'relative overflow-hidden rounded-lg flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32';
+const thumbnailClasses = isGridMode ? 'w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300' : 'w-full h-full object-cover group-hover:scale-110 transition-transform duration-300';
+---
+
+<article class={articleClasses}>
+  <!-- THUMBNAIL (jika ada dan dalam mode grid atau list) -->
+  {thumbnail && (
+    <div class={thumbnailContainerClasses}>
+      <a href={href} aria-label={`Baca lebih lanjut tentang ${title}`}>
+        <img src={thumbnail} alt={title} class={thumbnailClasses} loading="lazy" />
+      </a>
+      {isGridMode && (
+        <>
+          <div class="absolute top-3 left-3">
+            <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${categoryColorClass}`}>
+              {categoryIcon && <span class="mr-1.5">{categoryIcon}</span>}
+              {category}
+            </span>
+          </div>
+          {featured && <div class="absolute top-3 right-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-accent text-white dark:bg-dark-accent">⭐ Featured</span></div>}
+        </>
+      )}
+    </div>
+  )}
+
+  <!-- KONTEN UTAMA -->
+  <div class="flex-grow flex flex-col space-y-2">
+    <!-- Header: Kategori & Judul -->
+    <div class="flex justify-between items-start">
+        <div>
+            {/* Tampilkan kategori di atas judul jika mode list atau tidak ada thumbnail di mode grid */}
+            {(!isGridMode || !thumbnail) && (
+                <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mb-2 ${categoryColorClass}`}>
+                    {categoryIcon && <span class="mr-1.5">{categoryIcon}</span>}
+                    {category}
+                </span>
+            )}
+            <h3 class={`text-lg font-semibold text-light-text dark:text-dark-text group-hover:text-light-accent dark:group-hover:text-dark-accent transition-colors`}>
+                <a href={href} class="hover:underline">{title}</a>
+            </h3>
+        </div>
+        {(!isGridMode || !thumbnail) && featured && (
+            <span class="flex-shrink-0 ml-4 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-accent text-white dark:bg-dark-accent">⭐</span>
+        )}
+    </div>
+
+    <!-- Slot untuk Metadata (seperti tanggal, waktu baca, dll) -->
+    <slot name="meta" />
+
+    <!-- Deskripsi -->
+    <p class={`text-light-muted dark:text-dark-muted text-sm ${isGridMode ? 'line-clamp-3' : 'line-clamp-2'}`}>{description}</p>
+    
+    <div class="flex-grow"></div> <!-- Spacer -->
+
+    <!-- Tags -->
+    <div class="flex flex-wrap gap-2 pt-2">
+      {tags.slice(0, 3).map(tag => <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-light-border dark:bg-dark-border text-light-text dark:text-dark-text">#{tag}</span>)}
+      {tags.length > 3 && <span class="text-xs text-light-muted dark:text-dark-muted self-center">+{tags.length - 3} lagi</span>}
+    </div>
+
+    <!-- Slot untuk Aksi (Tombol/Link di bagian bawah) -->
+    <div class="pt-4 mt-auto border-t border-light-border dark:border-dark-border">
+        <slot name="actions">
+            <!-- Fallback default action -->
+            <a href={href} class="text-light-accent dark:text-dark-accent hover:underline text-sm font-medium flex items-center group-hover:gap-2 transition-all duration-300">
+                Lihat Detail
+                <span class="transition-transform duration-300 group-hover:translate-x-1">→</span>
+            </a>
+        </slot>
+    </div>
+  </div>
+</article>

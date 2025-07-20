@@ -1,0 +1,87 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  return pages.map(page => ({
+    params: { slug: page.slug.split('/').pop()?.replace(/_/g, '-') },
+    props: { page },
+  }));
+}
+
+type Props = {
+  page: CollectionEntry<'pages'>;
+};
+
+const { page } = Astro.props;
+const { Content } = await page.render();
+---
+
+<Layout title={page.data.title} description={page.data.description}>
+  <!-- Hero Section -->
+  <section class="py-20 px-4 sm:px-6 lg:px-8 bg-light-surface dark:bg-dark-surface">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-5xl font-bold text-light-text dark:text-dark-text mb-4">
+        🛡️ {page.data.title}
+      </h1>
+      <h2 class="text-xl text-light-muted dark:text-dark-muted">
+        {page.data.description}
+      </h2>
+      <p class="mt-2 text-sm text-light-muted dark:text-dark-muted italic">
+        Last updated: July 11, 2024
+      </p>
+    </div>
+  </section>
+
+  <!-- Visual Highlight -->
+  <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 dark:border-yellow-300 p-4 rounded-md mx-4 sm:mx-6 lg:mx-8 mb-12">
+    <p class="text-yellow-900 dark:text-yellow-100 text-sm text-center">
+      ⚠️ Dengan menggunakan situs ini, Anda menyetujui kebijakan privasi ini.
+    </p>
+  </div>
+
+  <!-- Markdown Content -->
+  <article class="px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto prose prose-lg dark:prose-invert max-w-none">
+      <Content />
+    </div>
+
+    <!-- Navigation -->
+    <nav class="mt-16 pt-8 border-t border-light-border dark:border-dark-border flex justify-between items-center">
+      <a 
+        href="/projects" 
+        class="text-light-accent dark:text-dark-accent hover:underline"
+      >
+        ← Kembali ke Proyek
+      </a>
+      <a 
+        href="/pages/terms" 
+        class="text-light-accent dark:text-dark-accent hover:underline"
+      >
+        Syarat Penggunaan →
+      </a>
+    </nav>
+  </article>
+</Layout>
+
+<style is:global>
+  .prose {
+    @apply text-light-text dark:text-dark-text transition-all;
+  }
+  .prose h1, .prose h2, .prose h3 {
+    @apply font-bold tracking-tight;
+  }
+  .prose a {
+    @apply transition-colors hover:text-light-accent dark:hover:text-dark-accent;
+  }
+  .prose blockquote {
+    @apply border-l-4 border-light-accent dark:border-dark-accent italic pl-4;
+  }
+  .prose code {
+    @apply bg-light-surface dark:bg-dark-surface px-1 py-0.5 rounded text-sm;
+  }
+  .prose pre {
+    @apply bg-light-surface dark:bg-dark-surface rounded-lg overflow-auto;
+  }
+</style>

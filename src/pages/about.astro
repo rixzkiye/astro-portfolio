@@ -1,0 +1,395 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout 
+  title="About - Your Name"
+  description="Learn more about me, my journey, skills, and passion for creating meaningful digital experiences."
+>
+  <!-- Hero Section -->
+  <section class="py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <!-- Profile Image -->
+        <div class="order-2 lg:order-1">
+          <div class="relative">
+            <div class="w-80 h-80 mx-auto rounded-2xl overflow-hidden shadow-2xl">
+              <img
+                src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Profile"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <!-- Floating Elements -->
+            <div class="absolute -top-4 -right-4 w-20 h-20 bg-light-accent/20 dark:bg-dark-accent/20 rounded-full blur-xl animate-float"></div>
+            <div class="absolute -bottom-4 -left-4 w-16 h-16 bg-light-sage/20 dark:bg-dark-gold/20 rounded-full blur-xl animate-float" style="animation-delay: -2s;"></div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="order-1 lg:order-2">
+          <h1 class="text-4xl md:text-6xl font-bold text-light-text dark:text-dark-text mb-6">
+            Hello, I'm <span class="text-gradient">Your Name</span>
+          </h1>
+          <p class="text-xl text-light-muted dark:text-dark-muted mb-8 leading-relaxed">
+            A passionate creative developer and digital storyteller who bridges the gap between technology and artistry. 
+            I believe in creating meaningful experiences that inspire, educate, and connect people.
+          </p>
+          
+          <div class="flex flex-wrap gap-4">
+            <a href="/contact" class="btn-primary">
+              Get In Touch
+            </a>
+            <a href="/pustaka" class="btn-secondary">
+              View My Work
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bio Section -->
+  <section class="py-20 px-4 sm:px-6 lg:px-8 bg-light-surface dark:bg-dark-surface">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-3xl font-bold text-light-text dark:text-dark-text mb-8 text-center">
+        My Journey
+      </h2>
+      
+      <div class="prose-custom">
+        <p class="text-lg mb-6">
+          My journey began with a curiosity about how things work and a desire to create something meaningful. 
+          What started as tinkering with code has evolved into a multidisciplinary approach to digital creativity, 
+          spanning web development, music production, and written expression.
+        </p>
+        
+        <p class="text-lg mb-6">
+          I'm fascinated by the intersection of technology and human experience. Whether I'm building a responsive 
+          web application, composing ambient soundscapes, or writing reflective essays, my goal is always to create 
+          something that resonates with people on a deeper level.
+        </p>
+        
+        <p class="text-lg">
+          When I'm not coding or creating, you'll find me exploring nature, reading philosophy, or experimenting 
+          with new creative tools. I believe that the best digital experiences come from understanding both the 
+          technical possibilities and the human needs they serve.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Section -->
+  <section class="py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl font-bold text-light-text dark:text-dark-text mb-12 text-center">
+        Skills & Expertise
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Technical Skills -->
+        <div class="card">
+          <div class="text-3xl mb-4">💻</div>
+          <h3 class="text-xl font-semibold text-light-text dark:text-dark-text mb-4">
+            Web Development
+          </h3>
+          <div class="space-y-3">
+            <div class="skill-item">
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">JavaScript/TypeScript</span>
+                <span class="text-sm text-light-muted dark:text-dark-muted">90%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" style="width: 90%"></div>
+              </div>
+            </div>
+            
+            <div class="skill-item">
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">React/Astro</span>
+                <span class="text-sm text-light-muted dark:text-dark-muted">85%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" style="width: 85%"></div>
+              </div>
+            </div>
+            
+            <div class="skill-item">
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">CSS/Tailwind</span>
+                <span class="text-sm text-light-muted dark:text-dark-muted">95%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" style="width: 95%"></div>
+              </div>
+            </div>
+            
+            <div class="skill-item">
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">Node.js</span>
+                <span class="text-sm text-light-muted dark:text-dark-muted">80%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" style="width: 80%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Creative Skills -->
+        <div class="card">
+          <div class="text-3xl mb-4">🎨</div>
+          <h3 class="text-xl font-semibold text-light-text dark:text-dark-text mb-4">
+            Creative Arts
+          </h3>
+          <div class="space-y-3">
+            <div class="skill-item">
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">Music Production</span>
+                <span class="text-sm text-light-muted dark:text-dark-muted">85%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" style="width: 85%"></div>
+              </div>
+            </div>
+            
+            <div class="skill-item">
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">Sound Design</span>
+                <span class="text-sm text-light-muted dark:text-dark-muted">80%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" style="width: 80%"></div>
+              </div>
+            </div>
+            
+            <div class="skill-item">
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">UI/UX Design</span>
+                <span class="text-sm text-light-muted dark:text-dark-muted">75%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" style="width: 75%"></div>
+              </div>
+            </div>
+            
+            <div class="skill-item">
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">Video Editing</span>
+                <span class="text-sm text-light-muted dark:text-dark-muted">70%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" style="width: 70%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Writing Skills -->
+        <div class="card">
+          <div class="text-3xl mb-4">✍️</div>
+          <h3 class="text-xl font-semibold text-light-text dark:text-dark-text mb-4">
+            Writing & Communication
+          </h3>
+          <div class="space-y-3">
+            <div class="skill-item">
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">Technical Writing</span>
+                <span class="text-sm text-light-muted dark:text-dark-muted">90%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" style="width: 90%"></div>
+              </div>
+            </div>
+            
+            <div class="skill-item">
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">Creative Writing</span>
+                <span class="text-sm text-light-muted dark:text-dark-muted">85%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" style="width: 85%"></div>
+              </div>
+            </div>
+            
+            <div class="skill-item">
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">Content Strategy</span>
+                <span class="text-sm text-light-muted dark:text-dark-muted">80%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" style="width: 80%"></div>
+              </div>
+            </div>
+            
+            <div class="skill-item">
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">SEO Writing</span>
+                <span class="text-sm text-light-muted dark:text-dark-muted">75%</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-progress" style="width: 75%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline Section -->
+  <section class="py-20 px-4 sm:px-6 lg:px-8 bg-light-surface dark:bg-dark-surface">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-3xl font-bold text-light-text dark:text-dark-text mb-12 text-center">
+        Career Timeline
+      </h2>
+      
+      <div class="relative">
+        <!-- Timeline Line -->
+        <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-light-border dark:bg-dark-border"></div>
+        
+        <div class="space-y-12">
+          <!-- Timeline Item -->
+          <div class="relative flex items-start">
+            <div class="flex-shrink-0 w-16 h-16 bg-light-accent dark:bg-dark-accent rounded-full flex items-center justify-center text-white font-bold">
+              2025
+            </div>
+            <div class="ml-8">
+              <h3 class="text-xl font-semibold text-light-text dark:text-dark-text mb-2">
+                Full-Stack Developer & Creative
+              </h3>
+              <p class="text-light-muted dark:text-dark-muted mb-4">
+                Focusing on modern web technologies and creative projects. Building this portfolio 
+                website and exploring the intersection of technology and art.
+              </p>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 bg-light-accent/10 dark:bg-dark-accent/10 text-light-accent dark:text-dark-accent rounded-full text-sm">
+                  Astro
+                </span>
+                <span class="px-3 py-1 bg-light-accent/10 dark:bg-dark-accent/10 text-light-accent dark:text-dark-accent rounded-full text-sm">
+                  React
+                </span>
+                <span class="px-3 py-1 bg-light-accent/10 dark:bg-dark-accent/10 text-light-accent dark:text-dark-accent rounded-full text-sm">
+                  TypeScript
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timeline Item -->
+          <div class="relative flex items-start">
+            <div class="flex-shrink-0 w-16 h-16 bg-light-sage dark:bg-dark-sage rounded-full flex items-center justify-center text-white font-bold">
+              2024
+            </div>
+            <div class="ml-8">
+              <h3 class="text-xl font-semibold text-light-text dark:text-dark-text mb-2">
+                Digital Content Creator
+              </h3>
+              <p class="text-light-muted dark:text-dark-muted mb-4">
+                Expanded into music production and writing. Started creating ambient soundscapes 
+                and reflective essays about technology and society.
+              </p>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 bg-light-sage/10 dark:bg-dark-gold/10 text-light-sage dark:text-dark-gold rounded-full text-sm">
+                  Music Production
+                </span>
+                <span class="px-3 py-1 bg-light-sage/10 dark:bg-dark-gold/10 text-light-sage dark:text-dark-gold rounded-full text-sm">
+                  Creative Writing
+                </span>
+                <span class="px-3 py-1 bg-light-sage/10 dark:bg-dark-gold/10 text-light-sage dark:text-dark-gold rounded-full text-sm">
+                  Content Strategy
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timeline Item -->
+          <div class="relative flex items-start">
+            <div class="flex-shrink-0 w-16 h-16 bg-light-muted dark:bg-dark-muted rounded-full flex items-center justify-center text-white font-bold">
+              2023
+            </div>
+            <div class="ml-8">
+              <h3 class="text-xl font-semibold text-light-text dark:text-dark-text mb-2">
+                Web Developer
+              </h3>
+              <p class="text-light-muted dark:text-dark-muted mb-4">
+                Started my journey in web development, learning modern frameworks and 
+                best practices. Built several projects and contributed to open source.
+              </p>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 bg-light-muted/20 dark:bg-dark-muted/20 text-light-text dark:text-dark-text rounded-full text-sm">
+                  JavaScript
+                </span>
+                <span class="px-3 py-1 bg-light-muted/20 dark:bg-dark-muted/20 text-light-text dark:text-dark-text rounded-full text-sm">
+                  CSS
+                </span>
+                <span class="px-3 py-1 bg-light-muted/20 dark:bg-dark-muted/20 text-light-text dark:text-dark-text rounded-full text-sm">
+                  Git
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact CTA -->
+  <section class="py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-3xl font-bold text-light-text dark:text-dark-text mb-6">
+        Let's Work Together
+      </h2>
+      <p class="text-xl text-light-muted dark:text-dark-muted mb-8">
+        I'm always interested in new opportunities and collaborations. 
+        Whether you have a project in mind or just want to chat about technology and creativity.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="mailto:your.email@example.com" class="btn-primary">
+          Send Email
+        </a>
+        <a href="/contact" class="btn-secondary">
+          Contact Form
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .skill-bar {
+    @apply w-full bg-light-border dark:bg-dark-border rounded-full h-2;
+  }
+
+  .skill-progress {
+    @apply h-2 rounded-full transition-all duration-[3000ms] ease-out;
+    background-image: linear-gradient(to right, #db2777, #475569); /* dari light-accent ke light-secondary */
+  }
+
+  .dark .skill-progress {
+    background-image: linear-gradient(to right, #f472b6, #94a3b8); /* dari dark-accent ke dark-secondary */
+  }
+
+  
+</style>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const skillBars = document.querySelectorAll('.skill-progress');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target as HTMLElement;
+          const width = el.style.width;
+          el.style.width = '0%';
+          setTimeout(() => {
+            el.style.width = width;
+          }, 100);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    skillBars.forEach(bar => observer.observe(bar));
+  });
+</script>

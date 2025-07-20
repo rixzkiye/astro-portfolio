@@ -1,0 +1,30 @@
+---
+// src/pages/projects.astro
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import SearchFilter from '../components/SearchFilter.astro';
+
+type CategoryKey = 'code' | 'music' | 'video';
+
+const projects = await getCollection('projects', ({ data }) => data.status === 'published');
+const sortedProjects = projects.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const categories: { key: CategoryKey; name: string; icon: string; }[] = [
+ { key: 'code', name: 'Code', icon: '💻' },
+ { key: 'music', name: 'Music', icon: '🎵' },
+ { key: 'video', name: 'Video', icon: '🎬' },
+];
+---
+
+<Layout 
+ title="Projects - My Work"
+ description="Explore my creative projects spanning code, music, and video."
+>
+ <SearchFilter 
+  items={sortedProjects}
+  itemType="project"
+  placeholder="Search for projects by title, description, or tag..."
+  categories={categories}
+  allText="📁 All Projects"
+ />
+</Layout>

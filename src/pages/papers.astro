@@ -1,0 +1,36 @@
+---
+// src/pages/papers.astro
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import SearchFilter from '../components/SearchFilter.astro';
+
+type CategoryKey = 'esai' | 'puisi' | 'artikel' | 'cerpen';
+
+const papers = await getCollection('papers', ({ data }) => data.status === 'published');
+const sortedPapers = papers.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const categories: { key: CategoryKey; name: string; icon: string; }[] = [
+ { key: 'esai', name: 'Esai', icon: '📄' },
+ { key: 'puisi', name: 'Puisi', icon: '✨' },
+ { key: 'artikel', name: 'Artikel', icon: '📰' },
+ { key: 'cerpen', name: 'Cerpen', icon: '🔥' },
+];
+---
+
+<Layout 
+ title="Writings - My Work"
+ description="Explore my written works including essays, poetry, and articles."
+>
+ <SearchFilter 
+  items={sortedPapers}
+  itemType="paper"
+  placeholder="Search writings by title, description, or tag..."
+  categories={categories}
+  allText="📚 All Writings"
+  emptyDialog={{
+   icon: "📝",
+   title: "Writings Coming Soon",
+   message: "I am currently preparing some interesting writings. Stay tuned!"
+  }}
+ />
+</Layout>

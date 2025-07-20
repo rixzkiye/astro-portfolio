@@ -1,0 +1,203 @@
+---
+// Impor komponen lain jika ada, seperti ThemeToggle
+import ThemeToggle from './ThemeToggle.tsx';
+
+// Mendapatkan path URL saat ini untuk menyorot link yang aktif
+const { pathname } = Astro.url;
+
+// Fungsi bantuan untuk menentukan apakah link aktif.
+// Berguna untuk path yang memiliki sub-halaman, e.g., /projects/project-a
+const isActive = (href: string) => {
+  if (href === '/') {
+    // Kasus khusus untuk halaman home
+    return pathname === href;
+  }
+  return pathname.startsWith(href);
+}
+---
+
+<!-- 
+  Header utama. 
+  Class warna diperbarui sesuai dengan tailwind.config.js Anda.
+-->
+<header id="main-header" class="fixed top-0 left-0 right-0 z-40 transition-all duration-300 bg-light-bg/80 dark:bg-dark-bg/80 backdrop-blur-md border-b border-light-border dark:border-dark-border shadow-md">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      
+      <!-- Logo/Brand -->
+      <div class="flex-shrink-0">
+        <a href="/" class="text-xl font-bold text-light-text dark:text-dark-text hover:opacity-80 transition-opacity">
+          Your Name
+        </a>
+      </div>
+
+      <!-- Navigasi Desktop -->
+      <nav class="hidden md:block">
+        <div class="ml-10 flex items-baseline space-x-2">
+          <!-- Link navigasi dengan class 'is-active' dinamis -->
+          <a href="/" class:list={["nav-link", { "is-active": isActive('/') }]}>Home</a>
+          <a href="/projects" class:list={["nav-link", { "is-active": isActive('/projects') }]}>Projects</a>
+          <a href="/papers" class:list={["nav-link", { "is-active": isActive('/papers') }]}>Papers</a>
+          <a href="/pustaka" class:list={["nav-link", { "is-active": isActive('/pustaka') }]}>Pustaka</a>
+          <a href="/about" class:list={["nav-link", { "is-active": isActive('/about') }]}>About</a>
+        </div>
+      </nav>
+
+      <!-- Tombol Tema & Menu Mobile -->
+      <div class="flex items-center space-x-4">
+        <ThemeToggle client:load />
+        
+        <div class="md:hidden">
+          <button
+            id="mobile-menu-button"
+            type="button"
+            class="relative w-8 h-8 flex justify-center items-center rounded-full text-light-muted dark:text-dark-muted hover:bg-light-border dark:hover:bg-dark-border transition-colors"
+            aria-controls="mobile-menu"
+            aria-expanded="false"
+          >
+            <span class="sr-only">Buka menu utama</span>
+            <div class="hamburger-icon space-y-1.5">
+              <span class="line top"></span>
+              <span class="line middle"></span>
+              <span class="line bottom"></span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel Menu Mobile -->
+  <div 
+    id="mobile-menu" 
+    class="md:hidden absolute top-full left-0 w-full bg-light-surface/95 dark:bg-dark-surface/95 backdrop-blur-md shadow-lg"
+  >
+    <div class="px-2 pt-2 pb-4 space-y-1">
+      <a href="/" class:list={["mobile-nav-link", { "is-active": isActive('/') }]}>Home</a>
+      <a href="/projects" class:list={["mobile-nav-link", { "is-active": isActive('/projects') }]}>Projects</a>
+      <a href="/papers" class:list={["mobile-nav-link", { "is-active": isActive('/papers') }]}>Papers</a>
+      <a href="/pustaka" class:list={["mobile-nav-link", { "is-active": isActive('/pustaka') }]}>Pustaka</a>
+      <a href="/about" class:list={["mobile-nav-link", { "is-active": isActive('/about') }]}>About</a>
+    </div>
+  </div>
+</header>
+
+<style>
+  /* Styling untuk link navigasi desktop */
+  .nav-link {
+    @apply relative px-3 py-2 rounded-md text-sm font-medium text-light-muted dark:text-dark-muted transition-all duration-200;
+  }
+  .nav-link:hover {
+    @apply text-light-text dark:text-dark-text bg-light-border dark:bg-dark-border;
+  }
+  
+  /* Garis bawah animasi untuk link desktop */
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 12px;
+    right: 12px;
+    height: 2px;
+    background-color: theme('colors.light.accent');
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  /* Perubahan untuk dark mode pada garis bawah */
+  .dark .nav-link::after {
+    background-color: theme('colors.dark.accent');
+  }
+
+  .nav-link:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* Styling untuk link desktop yang AKTIF */
+  .nav-link.is-active {
+    @apply text-light-text dark:text-dark-text;
+  }
+  .nav-link.is-active::after {
+    transform: scaleX(1); /* Selalu tampilkan garis bawah jika aktif */
+  }
+
+  /* Styling untuk link navigasi mobile */
+  .mobile-nav-link {
+    @apply block px-4 py-3 rounded-md font-medium text-light-text dark:text-dark-text hover:bg-light-border dark:hover:bg-dark-border transition-all duration-200;
+  }
+  
+  /* Styling untuk link mobile yang AKTIF */
+  .mobile-nav-link.is-active {
+    @apply bg-light-primary text-white dark:bg-dark-primary dark:text-dark-text;
+  }
+
+  /* --- Animasi Ikon Hamburger --- */
+  .hamburger-icon .line {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background-color: currentColor;
+    border-radius: 1px;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  }
+  
+  #main-header.is-open .hamburger-icon .top {
+    transform: translateY(8px) rotate(45deg);
+  }
+  #main-header.is-open .hamburger-icon .middle {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  #main-header.is-open .hamburger-icon .bottom {
+    transform: translateY(-8px) rotate(-45deg);
+  }
+
+  /* --- Animasi Panel Menu Mobile --- */
+  #mobile-menu {
+    transform: translateY(-10%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+  }
+
+  #main-header.is-open #mobile-menu {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const header = document.getElementById('main-header');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    if (!header || !mobileMenuButton || !mobileMenu) {
+      console.error('Elemen Navbar tidak ditemukan.');
+      return;
+    }
+
+    mobileMenuButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const isOpen = header.classList.toggle('is-open');
+      mobileMenuButton.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    const mobileNavLinks = mobileMenu.querySelectorAll('a');
+    mobileNavLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        header.classList.remove('is-open');
+        mobileMenuButton.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      if (header.classList.contains('is-open') && !header.contains(event.target as Node)) {
+        header.classList.remove('is-open');
+        mobileMenuButton.setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
+</script>

@@ -1,0 +1,166 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import ProjectCard from '../components/ProjectCard.astro';
+import PaperCard from '../components/PaperCard.astro';
+
+// Get featured content
+const projects = await getCollection('projects', ({ data }) => {
+  return data.status === 'published' && data.featured;
+});
+
+const papers = await getCollection('papers', ({ data }) => {
+  return data.status === 'published' && data.featured;
+});
+
+// Sort by date (newest first)
+const sortedProjects = projects.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()).slice(0, 3);
+const sortedPapers = papers.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()).slice(0, 3);
+---
+
+<Layout 
+  title="Your Name - Portfolio & Blog"
+  description="Welcome to my digital space. Explore my projects, read my papers, and discover my creative journey."
+>
+  <!-- Hero Section -->
+  <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <!-- Background Animation -->
+    <div class="absolute inset-0 bg-gradient-to-br from-light-bg via-light-surface to-light-bg dark:from-dark-bg dark:via-dark-surface dark:to-dark-bg"></div>
+    
+    <!-- Floating Elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-light-accent/10 dark:bg-dark-accent/10 rounded-full blur-3xl animate-float"></div>
+      <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-light-sage/10 dark:bg-dark-gold/10 rounded-full blur-3xl animate-float" style="animation-delay: -3s;"></div>
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="animate-fade-in-up">
+        <h1 class="text-5xl md:text-7xl font-bold mb-6">
+          <span class="text-gradient">Your Name</span>
+        </h1>
+        
+        <p class="text-xl md:text-2xl text-light-muted dark:text-dark-muted mb-8 max-w-2xl mx-auto">
+          Creative developer, writer, and digital storyteller crafting meaningful experiences through code and words.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <a href="/projects" class="btn-primary">
+            Explore Projects
+          </a>
+          <a href="/papers" class="btn-secondary">
+            Read Papers
+          </a>
+          <a href="/about" class="text-light-accent dark:text-dark-accent hover:underline font-medium">
+            Learn More About Me →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+      <div class="w-6 h-10 border-2 border-light-muted dark:border-dark-muted rounded-full flex justify-center">
+        <div class="w-1 h-3 bg-light-muted dark:bg-dark-muted rounded-full mt-2 animate-pulse"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Projects Section -->
+  {sortedProjects.length > 0 && (
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-light-text dark:text-dark-text mb-4">
+            Featured Projects
+          </h2>
+          <p class="text-light-muted dark:text-dark-muted max-w-2xl mx-auto">
+            Discover my latest work spanning code, music, and video projects.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          {sortedProjects.map((project) => (
+            <ProjectCard
+              title={project.data.title}
+              description={project.data.description}
+              thumbnail={project.data.thumbnail}
+              category={project.data.category}
+              tags={project.data.tags}
+              slug={project.slug}
+              externalLink={project.data.externalLink}
+              githubLink={project.data.githubLink}
+              youtubeLink={project.data.youtubeLink}
+              spotifyLink={project.data.spotifyLink}
+              featured={project.data.featured}
+            />
+          ))}
+        </div>
+
+        <div class="text-center">
+          <a href="/projects" class="btn-secondary">
+            View All Projects
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Featured Papers Section -->
+  {sortedPapers.length > 0 && (
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-light-surface dark:bg-dark-surface">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-light-text dark:text-dark-text mb-4">
+            Featured Papers
+          </h2>
+          <p class="text-light-muted dark:text-dark-muted max-w-2xl mx-auto">
+            Explore my thoughts through essays, poetry, and articles.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          {sortedPapers.map((paper) => (
+            <PaperCard
+              title={paper.data.title}
+              description={paper.data.description}
+              thumbnail={paper.data.thumbnail}
+              category={paper.data.category}
+              tags={paper.data.tags}
+              slug={paper.slug}
+              date={paper.data.date}
+              views={paper.data.views}
+              readTime={paper.data.readTime}
+              featured={paper.data.featured}
+            />
+          ))}
+        </div>
+
+        <div class="text-center">
+          <a href="/papers" class="btn-secondary">
+            View All Papers
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Call to Action Section -->
+  <section class="py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-3xl md:text-4xl font-bold text-light-text dark:text-dark-text mb-6">
+        Let's Create Something Amazing Together
+      </h2>
+      <p class="text-light-muted dark:text-dark-muted text-lg mb-8">
+        I'm always open to new opportunities, collaborations, and interesting conversations.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/contact" class="btn-primary">
+          Get In Touch
+        </a>
+        <a href="/pustaka" class="btn-secondary">
+          Browse Library
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

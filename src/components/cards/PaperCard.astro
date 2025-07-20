@@ -1,0 +1,63 @@
+<!-- src/components/cards/PaperCard.astro -->
+---
+import BaseCard from './BaseCard.astro';
+import { FileText, Clock, Eye } from 'lucide-react';
+
+export interface Props {
+  title: string;
+  description: string;
+  thumbnail?: string;
+  category: 'esai' | 'puisi' | 'artikel' | 'cerpen';
+  tags: string[];
+  slug: string;
+  date: Date;
+  views?: number;
+  readTime?: number;
+  featured?: boolean;
+  viewMode?: 'grid' | 'list';
+}
+
+const { slug, date, views = 0, readTime, viewMode, ...rest } = Astro.props;
+
+const categoryConfig = {
+  esai: {
+    color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    icon: '📄'
+  },
+  puisi: {
+    color: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
+    icon: '✨'
+  },
+  artikel: {
+    color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+    icon: '📰'
+  },
+  cerpen: {
+    color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+    icon: '🔥'
+  }
+};
+
+const formatDate = (d: Date) => new Intl.DateTimeFormat('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }).format(d);
+---
+<BaseCard 
+  {...rest}
+  slug={slug}
+  href={`/papers/${slug}`}
+  categoryColorClass={categoryConfig[rest.category].color}
+  categoryIcon={categoryConfig[rest.category].icon}
+  viewMode={viewMode}
+>
+  <div slot="meta" class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-light-muted dark:text-dark-muted my-2">
+    <span class="flex items-center"><FileText className="w-3.5 h-3.5 mr-1.5" />{formatDate(date)}</span>
+    {readTime && <span class="flex items-center"><Clock className="w-3.5 h-3.5 mr-1.5" />{readTime} min read</span>}
+    <span class="flex items-center"><Eye className="w-3.5 h-3.5 mr-1.5" />{views} views</span>
+  </div>
+
+  <div slot="actions">
+    <a href={`/papers/${slug}`} class="text-light-accent dark:text-dark-accent hover:underline text-sm font-medium flex items-center group-hover:gap-2 transition-all duration-300">
+      {rest.category === 'puisi' ? 'Baca Puisi' : 'Baca Selengkapnya'}
+      <span class="transition-transform duration-300 group-hover:translate-x-1">→</span>
+    </a>
+  </div>
+</BaseCard>

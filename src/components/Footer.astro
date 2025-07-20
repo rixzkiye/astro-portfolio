@@ -1,0 +1,83 @@
+---
+import { Github, Linkedin, Instagram, X } from 'lucide-react';
+---
+
+<footer class="bg-light-surface dark:bg-dark-surface border-t border-light-border dark:border-dark-border mt-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+      <!-- Copyright -->
+      <div class="text-center md:text-left">
+        <p class="text-light-muted dark:text-dark-muted">
+          © 2025 <span class="text-light-text dark:text-dark-text font-medium">Your Name</span>. All rights reserved.
+        </p>
+      </div>
+
+      <!-- Social Links -->
+      <div class="flex items-center space-x-6">
+        <a
+          href="https://github.com/yourusername"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-link"
+          aria-label="GitHub"
+        >
+          <Github className="w-5 h-5" />
+        </a>
+        
+        <a
+          href="https://linkedin.com/in/yourusername"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-link"
+          aria-label="LinkedIn"
+        >
+          <Linkedin className="w-5 h-5" />
+        </a>
+        
+        <a
+          href="https://instagram.com/yourusername"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-link"
+          aria-label="Instagram"
+        >
+          <Instagram className="w-5 h-5" />
+        </a>
+        
+        <a
+          href="https://X.com/yourusername"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-link"
+          aria-label="X"
+        >
+          <X className="w-5 h-5" />
+        </a>
+      </div>
+    </div>
+
+    <!-- Additional Links (Optional) -->
+    <div class="mt-8 pt-8 border-t border-light-border dark:border-dark-border">
+      <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8">
+        <a href="/privacy" class="footer-link">Privacy Policy</a>
+        <a href="/terms" class="footer-link">Terms of Service</a>
+        <a href="/contact" class="footer-link">Contact</a>
+        <a href="/sitemap.xml" class="footer-link">Sitemap</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .social-link {
+    @apply text-light-muted dark:text-dark-muted hover:text-light-accent dark:hover:text-dark-accent;
+    @apply transition-all duration-200 transform hover:scale-110;
+    @apply p-2 rounded-lg hover:bg-light-border dark:hover:bg-dark-border;
+  }
+  
+  .footer-link {
+    @apply text-light-muted dark:text-dark-muted hover:text-light-text dark:hover:text-dark-text;
+    @apply text-sm transition-colors duration-200;
+    @apply hover:underline;
+  }
+</style>

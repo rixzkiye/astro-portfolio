@@ -1,0 +1,57 @@
+---
+import BaseCard from './BaseCard.astro';
+import { ExternalLink, Github, Youtube, Music } from 'lucide-react';
+
+export interface Props {
+  title: string;
+  description: string;
+  thumbnail: string;
+  category: "code" | "music" | "video";
+  tags: string[];
+  slug: string;
+  externalLink?: string;
+  githubLink?: string;
+  youtubeLink?: string;
+  spotifyLink?: string;
+  featured?: boolean;
+  viewMode?: 'grid' | 'list';
+}
+
+const { slug, externalLink, githubLink, youtubeLink, spotifyLink, viewMode, ...rest } = Astro.props;
+
+const categoryConfig = {
+  code: {
+    color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+    icon: "💻"
+  },
+  music: {
+    color: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+    icon: "🎵"
+  },
+  video: {
+    color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+    icon: "🎬"
+  },
+};
+---
+<BaseCard
+  {...rest}
+  slug={slug}
+  href={`/projects/${slug}`}
+  categoryColorClass={categoryConfig[rest.category].color}
+  categoryIcon={categoryConfig[rest.category].icon}
+  viewMode={viewMode}
+>
+  <div slot="actions" class="flex items-center justify-between w-full">
+    <a href={`/projects/${slug}`} class="text-light-accent dark:text-dark-accent hover:underline text-sm font-medium flex items-center group-hover:gap-2 transition-all duration-300">
+      Lihat Detail
+      <span class="transition-transform duration-300 group-hover:translate-x-1">→</span>
+    </a>
+    <div class="flex items-center space-x-1">
+      {externalLink && <a href={externalLink} target="_blank" rel="noopener noreferrer" class="p-2 text-light-muted dark:text-dark-muted hover:text-light-accent dark:hover:text-dark-accent transition-colors" aria-label="External Link"><ExternalLink className="w-4 h-4" /></a>}
+      {githubLink && <a href={githubLink} target="_blank" rel="noopener noreferrer" class="p-2 text-light-muted dark:text-dark-muted hover:text-light-accent dark:hover:text-dark-accent transition-colors" aria-label="GitHub"><Github className="w-4 h-4" /></a>}
+      {youtubeLink && <a href={youtubeLink} target="_blank" rel="noopener noreferrer" class="p-2 text-light-muted dark:text-dark-muted hover:text-red-500 transition-colors" aria-label="YouTube"><Youtube className="w-4 h-4" /></a>}
+      {spotifyLink && <a href={spotifyLink} target="_blank" rel="noopener noreferrer" class="p-2 text-light-muted dark:text-dark-muted hover:text-green-500 transition-colors" aria-label="Spotify"><Music className="w-4 h-4" /></a>}
+    </div>
+  </div>
+</BaseCard>

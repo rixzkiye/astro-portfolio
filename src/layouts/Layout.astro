@@ -1,0 +1,84 @@
+---
+import '../styles/global.css';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: string;
+}
+
+const {
+  title = "Nama Anda - Portofolio & Blog",
+  description = "Portofolio modern untuk menampilkan proyek, tulisan, dan karya kreatif.",
+  image = "/images/og-image.jpg",
+  type = "website"
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="id" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    
+    <!-- Meta Tag Utama -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={Astro.url} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(image, Astro.url)} />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={Astro.url} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={new URL(image, Astro.url)} />
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Memuat font Inter untuk teks utama dan Playfair Display untuk judul/serif -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+    
+    <!-- Skrip inisialisasi tema untuk mencegah FOUC (Flash of Unstyled Content) -->
+    <script is:inline>
+      (function() {
+        const theme = localStorage.getItem('theme') || 
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+  <!-- 
+    Menambahkan warna dasar dan transisi untuk pengalaman yang lebih halus.
+    - bg-light-bg/dark:bg-dark-bg: Mengatur warna latar belakang default.
+    - text-light-text/dark:text-dark-text: Mengatur warna teks default.
+    - transition-colors duration-300 ease-in-out: Menambahkan animasi saat berganti tema.
+  -->
+  <body class="min-h-screen flex flex-col bg-light-bg text-light-text dark:bg-dark-bg dark:text-dark-text transition-colors duration-300 ease-in-out">
+    <Navbar />
+    
+    <!-- Padding atas (pt-20) untuk memberi ruang dari Navbar yang kemungkinan fixed -->
+    <main class="flex-1 w-full max-w-5xl mx-auto px-4 pt-20 pb-10">
+      <slot />
+    </main>
+    
+    <Footer />
+  </body>
+</html>

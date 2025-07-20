@@ -1,0 +1,209 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { Clock, Eye, Calendar, Tag } from 'lucide-react';
+
+export async function getStaticPaths() {
+  const papers = await getCollection('papers', ({ data }) => {
+    return data.status === 'published';
+  });
+
+
+
+  return papers.map((paper) => ({
+    params: { 
+      category: paper.data.category,
+      slug: paper.slug.split('/').pop() // Extract just the filename
+    },
+    props: { paper },
+  }));
+}
+
+type Props = {
+  paper: CollectionEntry<'papers'>;
+};
+
+const { paper } = Astro.props;
+const { Content } = await paper.render();
+
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat('id-ID', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(date);
+};
+
+const categoryColors = {
+  esai: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  puisi: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
+  artikel: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+  cerpen: 'bg-green-100 text-white-800 dark:bg-green-800 dark:text-white-200'
+};
+
+const categoryIcons = {
+  esai: '📄',
+  puisi: '✨',
+  artikel: '📰',
+  cerpen: '🔥'
+};
+---
+
+<Layout 
+  title={`${paper.data.title} - Your Name`}
+  description={paper.data.description}
+>
+  <!-- Hero Section -->
+  <article class="py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+      <!-- Back Navigation -->
+      <nav class="mb-8">
+        <a 
+          href="/papers" 
+          class="inline-flex items-center text-light-accent dark:text-dark-accent hover:underline"
+        >
+          ← Kembali ke Papers
+        </a>
+      </nav>
+
+      <!-- Header -->
+      <header class="mb-8">
+        <!-- Category Badge -->
+        <div class="mb-4">
+          <span class={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${categoryColors[paper.data.category]}`}>
+            <span class="mr-2">{categoryIcons[paper.data.category]}</span>
+            {paper.data.category}
+          </span>
+          {paper.data.featured && (
+            <span class="ml-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-accent text-white dark:bg-dark-accent">
+              ⭐ Featured
+            </span>
+          )}
+        </div>
+
+        <!-- Title -->
+        <h1 class={`text-4xl md:text-5xl font-bold text-light-text dark:text-dark-text mb-4 ${paper.data.category === 'puisi' ? 'font-serif' : ''}`}>
+          {paper.data.title}
+        </h1>
+
+        <!-- Description -->
+        <p class="text-xl text-light-muted dark:text-dark-muted mb-6">
+          {paper.data.description}
+        </p>
+
+        <!-- Meta Information -->
+        <div class="flex flex-wrap items-center gap-6 text-sm text-light-muted dark:text-dark-muted mb-6">
+          <span class="flex items-center">
+            <Calendar className="w-4 h-4 mr-2" />
+            {formatDate(paper.data.date)}
+          </span>
+          
+          {paper.data.readTime && (
+            <span class="flex items-center">
+              <Clock className="w-4 h-4 mr-2" />
+              {paper.data.readTime} min read
+            </span>
+          )}
+          
+          <span class="flex items-center">
+            <Eye className="w-4 h-4 mr-2" />
+            {paper.data.views} views
+          </span>
+        </div>
+
+        <!-- Tags -->
+        <div class="flex flex-wrap gap-2 mb-8">
+          {paper.data.tags.map(tag => (
+            <span class="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-light-border dark:bg-dark-border text-light-text dark:text-dark-text">
+              <Tag className="w-3 h-3 mr-1" />
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <!-- Thumbnail -->
+        {paper.data.thumbnail && (
+          <div class="mb-8">
+            <img
+              src={paper.data.thumbnail}
+              alt={paper.data.title}
+              class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
+              loading="eager"
+            />
+          </div>
+        )}
+      </header>
+
+      <!-- Content -->
+      <div class="prose prose-lg dark:prose-invert max-w-none">
+        <Content />
+      </div>
+
+      <!-- PDF Viewer (if PDF URL is provided) -->
+      {paper.data.pdfUrl && (
+        <div class="mt-12 p-6 bg-light-surface dark:bg-dark-surface rounded-lg">
+          <h3 class="text-xl font-semibold text-light-text dark:text-dark-text mb-4">
+            📄 Dokumen PDF
+          </h3>
+          <a 
+            href={paper.data.pdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center px-4 py-2 bg-light-accent dark:bg-dark-accent text-white rounded-lg hover:opacity-90 transition-opacity"
+          >
+            Buka PDF →
+          </a>
+        </div>
+      )}
+
+      <!-- Navigation -->
+      <nav class="mt-12 pt-8 border-t border-light-border dark:border-dark-border">
+        <div class="flex justify-between items-center">
+          <a 
+            href="/papers" 
+            class="text-light-accent dark:text-dark-accent hover:underline"
+          >
+            ← Semua Papers
+          </a>
+          <a 
+            href={`/papers?category=${paper.data.category}`}
+            class="text-light-accent dark:text-dark-accent hover:underline"
+          >
+            Lebih banyak {paper.data.category} →
+          </a>
+        </div>
+      </nav>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .prose {
+    @apply text-light-text dark:text-dark-text;
+  }
+  
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose h5,
+  .prose h6 {
+    @apply text-light-text dark:text-dark-text;
+  }
+  
+  .prose a {
+    @apply text-light-accent dark:text-dark-accent;
+  }
+  
+  .prose code {
+    @apply bg-light-surface dark:bg-dark-surface px-1 py-0.5 rounded text-sm;
+  }
+  
+  .prose pre {
+    @apply bg-light-surface dark:bg-dark-surface;
+  }
+  
+  .prose blockquote {
+    @apply border-l-4 border-light-accent dark:border-dark-accent;
+  }
+</style>
