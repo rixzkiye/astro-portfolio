@@ -1,0 +1,106 @@
+---
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  basePath?: string; // Path dasar untuk halaman, default ke "/"
+}
+
+const { currentPage, totalPages, basePath = "/" } = Astro.props;
+
+// Function to generate URL for a specific page
+const getPageUrl = (page: number) => {
+    if (page === 1) {
+        return basePath; // First page has base path without number
+    }
+    return `${basePath}${page}/`; // Other pages include the number
+};
+
+const pagesToShow = 5; // Number of page links to show at a time
+const startPage = Math.max(1, currentPage - Math.floor(pagesToShow / 2));
+const endPage = Math.min(totalPages, startPage + pagesToShow - 1);
+
+// Adjust startPage if endPage is the last page but we still have space to show more previous pages
+const adjustedStartPage = Math.max(1, endPage - pagesToShow + 1);
+
+---
+
+{totalPages > 1 && (
+  <nav class="flex justify-center items-center space-x-2 mt-12">
+    {/* Previous Button */}
+    {currentPage > 1 && (
+      <a
+        href={getPageUrl(currentPage - 1)}
+        class="px-4 py-2 border border-light-border dark:border-dark-border text-light-text dark:text-dark-text rounded-lg hover:bg-light-surface dark:hover:bg-dark-surface transition-colors"
+        aria-label="Previous Page"
+      >
+        ←
+      </a>
+    )}
+
+    {/* First Page Button (if not in range) */}
+    {adjustedStartPage > 1 && (
+         <>
+           <a
+             href={getPageUrl(1)}
+             class={`px-4 py-2 border rounded-lg transition-colors ${
+               1 === currentPage
+                 ? 'bg-light-accent text-white border-transparent dark:bg-dark-accent'
+                 : 'border-light-border dark:border-dark-border text-light-text dark:text-dark-text hover:bg-light-surface dark:hover:bg-dark-surface'
+             }`}
+           >
+             1
+           </a>
+           {adjustedStartPage > 2 && (
+               <span class="px-4 py-2 text-light-muted dark:text-dark-muted">...</span>
+           )}
+         </>
+     )}
+
+
+    {/* Page Number Buttons */}
+    {Array.from({ length: endPage - adjustedStartPage + 1 }, (_, i) => adjustedStartPage + i).map((page) => (
+      <a
+        href={getPageUrl(page)}
+        class={`px-4 py-2 border rounded-lg transition-colors ${
+          page === currentPage
+            ? 'bg-light-accent text-white border-transparent dark:bg-dark-accent'
+            : 'border-light-border dark:border-dark-border text-light-text dark:text-dark-text hover:bg-light-surface dark:hover:bg-dark-surface'
+        }`}
+        aria-current={page === currentPage ? "page" : undefined}
+      >
+        {page}
+      </a>
+    ))}
+
+    {/* Last Page Button (if not in range) */}
+    {endPage < totalPages && (
+        <>
+            {endPage < totalPages - 1 && (
+                <span class="px-4 py-2 text-light-muted dark:text-dark-muted">...</span>
+            )}
+            <a
+                href={getPageUrl(totalPages)}
+                class={`px-4 py-2 border rounded-lg transition-colors ${
+                totalPages === currentPage
+                    ? 'bg-light-accent text-white border-transparent dark:bg-dark-accent'
+                    : 'border-light-border dark:border-dark-border text-light-text dark:text-dark-text hover:bg-light-surface dark:hover:bg-dark-surface'
+                }`}
+            >
+                {totalPages}
+            </a>
+        </>
+    )}
+
+
+    {/* Next Button */}
+    {currentPage < totalPages && (
+      <a
+        href={getPageUrl(currentPage + 1)}
+        class="px-4 py-2 border border-light-border dark:border-dark-border text-light-text dark:text-dark-text rounded-lg hover:bg-light-surface dark:hover:bg-dark-surface transition-colors"
+        aria-label="Next Page"
+      >
+        →
+      </a>
+    )}
+  </nav>
+)}

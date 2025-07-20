@@ -1,7 +1,7 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { ExternalLink, Github, Youtube, Music, Calendar, Eye, Tag, Shield } from 'lucide-react';
+import { ExternalLink, Github, Youtube, Music, Calendar, Eye, Tag, Shield, FileText } from 'lucide-react';
 import { incrementView, getViewCount } from '../../../utils/viewCounter';
 
 export async function getStaticPaths() {
@@ -147,14 +147,25 @@ const currentViewCount = await getViewCount(pageId);
             </a>
           )}
 
-         {/* BLOK YANG DIPERBARUI: Tautan sekarang dinamis */}
+         {/* Tautan Privacy Policy */}
           {project.data.privacyLink && (
             <a
-              href={`/pages${project.data.privacyLink}`}
+              href={project.data.privacyLink}
               class="inline-flex items-center px-4 py-2 border border-light-border dark:border-dark-border text-light-text dark:text-dark-text rounded-lg hover:bg-light-surface dark:hover:bg-dark-surface transition-colors"
             >
               <Shield className="w-4 h-4 mr-2" />
               Privacy Policy
+            </a>
+          )}
+
+          {/* Tautan Terms of Service */}
+          {project.data.termsLink && (
+            <a
+              href={project.data.termsLink}
+              class="inline-flex items-center px-4 py-2 border border-light-border dark:border-dark-border text-light-text dark:text-dark-text rounded-lg hover:bg-light-surface dark:hover:bg-dark-surface transition-colors"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Terms of Service
             </a>
           )}
         </div>

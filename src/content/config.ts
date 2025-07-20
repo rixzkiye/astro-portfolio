@@ -15,7 +15,8 @@ const projectsCollection = defineCollection({
     githubLink: z.string().optional(),
     youtubeLink: z.string().optional(),
     spotifyLink: z.string().optional(),
-    privacyLink: z.string().optional(), // <-- TAMBAHKAN INI
+    privacyLink: z.string().optional(),
+    termsLink: z.string().optional(),
     featured: z.boolean().default(false),
     status: z.enum(['draft', 'published']).default('published'),
   }),
@@ -53,5 +54,5 @@ const policiesCollection = defineCollection({
 export const collections = {
   'projects': projectsCollection,
   'papers': papersCollection,
-  'policies': policiesCollection, // Added policies collection
+  'policies': policiesCollection, // Mengembalikan menjadi 'policies'
 };

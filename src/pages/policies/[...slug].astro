@@ -1,6 +1,8 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+// Anda mungkin ingin menggunakan view counter di sini juga, tergantung kebutuhan.
+// import { incrementView, getViewCount } from '../../utils/viewCounter';
 
 export async function getStaticPaths() {
   const policies = await getCollection('policies');
@@ -10,23 +12,107 @@ export async function getStaticPaths() {
   }));
 }
 
+type Props = {
+  policy: CollectionEntry<'policies'>;
+};
+
 const { policy } = Astro.props;
 const { Content } = await policy.render();
+
+// Jika menggunakan view counter:
+// const policyId = `policies-${policy.slug}`;
+// const viewCount = await incrementView(policyId);
+// const currentViewCount = await getViewCount(policyId);
+
+// Logika untuk navigasi kembali ke proyek dan navigasi antar dokumen legal
+const slugParts = policy.slug.split('/');
+const projectSlug = slugParts.length > 1 ? slugParts[0] : null; // Asumsi slug format: project-name/document-type
+const documentType = slugParts.length > 1 ? slugParts[1] : slugParts[0]; // privacy-policy atau terms-of-service
+
+let backToProjectLink = null;
+let backToProjectText = 'Kembali'; // Default text
+
+// Jika kita bisa mengidentifikasi proyek dari slug legal
+if (projectSlug) {
+  // Cari proyek yang slug-nya cocok dengan projectSlug
+  const projects = await getCollection('projects'); // Ambil semua proyek
+  const relatedProject = projects.find(proj => proj.slug.endsWith(projectSlug)); // Cari berdasarkan bagian akhir slug
+
+  if (relatedProject) {
+    // Jika proyek ditemukan, buat tautan ke halaman detail proyek
+    backToProjectLink = `/projects/${relatedProject.data.category}/${relatedProject.slug.split('/').pop()}`;
+    backToProjectText = `← Kembali ke Proyek: ${relatedProject.data.title}`; // Tampilkan judul proyek
+  } else {
+    // Jika proyek tidak ditemukan, kembali ke halaman proyek utama
+    backToProjectLink = '/projects';
+    backToProjectText = '← Kembali ke Proyek';
+  }
+} else {
+   // Jika tidak ada projectSlug (untuk dokumen legal umum)
+   backToProjectLink = '/'; // Kembali ke beranda atau halaman lain yang sesuai
+   backToProjectText = '← Kembali';
+}
+
+let otherDocumentLink = null;
+let otherDocumentText = null;
+
+if (projectSlug) {
+  // Jika ini dokumen legal spesifik proyek
+  if (documentType === 'privacy-policy') {
+    otherDocumentLink = `/policies/${projectSlug}/terms-of-service`; // Kembali menggunakan /policies/
+    otherDocumentText = 'Read Terms of Service →';
+  }
+   else if (documentType === 'terms-of-service') {
+    otherDocumentLink = `/policies/${projectSlug}/privacy-policy`; // Kembali menggunakan /policies/
+    otherDocumentText = 'Read Privacy Policy →';
+  }
+}
+// ... logika untuk dokumen legal umum (jika ada) ...
+
 ---
 
 <Layout title={policy.data.title} description={policy.data.description}>
-  <article class="py-12 px-4 sm:px-6 lg:px-8">
+  {/* ... Hero Section dan Visual Highlight tetap sama ... */}
+
+  <nav class="mb-8">
+    {/* Tombol Kembali */}
+    {backToProjectLink && (
+       <a
+          href={backToProjectLink}
+          class="inline-flex items-center text-light-accent dark:text-dark-accent hover:underline"
+        >
+          {backToProjectText}
+        </a>
+    )}
+
+  <!-- Markdown Content -->
+  <article class="px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto prose prose-lg dark:prose-invert max-w-none">
-      <header class="mb-8">
-        <h1 class="text-4xl md:text-5xl font-bold text-light-text dark:text-dark-text mb-4">
-          {policy.data.title}
-        </h1>
-        <p class="text-xl text-light-muted dark:text-dark-muted mb-6">
-          {policy.data.description}
-        </p>
-      </header>
       <Content />
     </div>
+
+    <!-- Navigation -->
+    <nav class="mt-16 pt-8 border-t border-light-border dark:border-dark-border flex justify-between items-center">
+      {/* Tombol Kembali */}
+      {backToProjectLink && (
+         <a
+            href={backToProjectLink}
+            class="text-light-accent dark:text-dark-accent hover:underline"
+          >
+            {backToProjectText}
+          </a>
+      )}
+
+      {/* Tombol Navigasi Antar Dokumen Legal */}
+      {otherDocumentLink && (
+        <a
+          href={otherDocumentLink}
+          class="text-light-accent dark:text-dark-accent hover:underline" 
+        >
+          {otherDocumentText}
+        </a>
+      )}
+    </nav>
   </article>
 </Layout>
 

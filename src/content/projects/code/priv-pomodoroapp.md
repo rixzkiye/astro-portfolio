@@ -6,8 +6,8 @@ category: "code"
 tags: ["astro", "tailwind", "typescript", "portfolio", "responsive"]
 date: 2025-01-15
 externalLink: "https://yourportfolio.com"
-privacyLink: ""
-githubLink: "https://github.com/yourusername/portfolio"
+privacyLink: "/policies/priv-pomodoroapp/privacy-policy"
+termsLink: "/policies/priv-pomodoroapp/terms-of-service"
 featured: true
 status: "published"
 ---

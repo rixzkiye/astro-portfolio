@@ -62,6 +62,9 @@
         "privacyLink": {
           "type": "string"
         },
+        "termsLink": {
+          "type": "string"
+        },
         "featured": {
           "type": "boolean",
           "default": false
