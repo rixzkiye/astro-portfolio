@@ -39,18 +39,19 @@ const papersCollection = defineCollection({
   }),
 });
 
-// BARU: Koleksi untuk Halaman Statis (seperti Privacy Policy)
-const pagesCollection = defineCollection({
-    type: 'content',
-    schema: z.object({
-        title: z.string(),
-        description: z.string(),
-    }),
+// BARU: Koleksi untuk Policies
+const policiesCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    type: z.enum(['privacy-policy', 'terms-of-service']), // Added policy type
+  }),
 });
 
 
 export const collections = {
   'projects': projectsCollection,
   'papers': papersCollection,
-  'pages': pagesCollection, // <-- TAMBAHKAN INI
+  'policies': policiesCollection, // Added policies collection
 };

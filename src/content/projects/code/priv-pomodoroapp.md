@@ -5,9 +5,8 @@ thumbnail: "https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?aut
 category: "code"
 tags: ["astro", "tailwind", "typescript", "portfolio", "responsive"]
 date: 2025-01-15
-views: 42
 externalLink: "https://yourportfolio.com"
-privacyLink: "/privacy-policy"
+privacyLink: ""
 githubLink: "https://github.com/yourusername/portfolio"
 featured: true
 status: "published"

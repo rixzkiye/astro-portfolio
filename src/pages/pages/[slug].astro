@@ -1,6 +1,7 @@
 ---
 import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import { incrementView, getViewCount } from '../../utils/viewCounter';
 
 export async function getStaticPaths() {
   const pages = await getCollection('pages');
@@ -16,6 +17,10 @@ type Props = {
 
 const { page } = Astro.props;
 const { Content } = await page.render();
+
+const pageId = `pages-${page.slug}`;
+const viewCount = await incrementView(pageId);
+const currentViewCount = await getViewCount(pageId);
 ---
 
 <Layout title={page.data.title} description={page.data.description}>
@@ -30,6 +35,9 @@ const { Content } = await page.render();
       </h2>
       <p class="mt-2 text-sm text-light-muted dark:text-dark-muted italic">
         Last updated: July 11, 2024
+      </p>
+      <p class="mt-2 text-sm text-light-muted dark:text-dark-muted">
+        Views: {currentViewCount}
       </p>
     </div>
   </section>

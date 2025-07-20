@@ -1,8 +1,8 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
-// Tambahkan 'Shield' dari lucide-react
 import { ExternalLink, Github, Youtube, Music, Calendar, Eye, Tag, Shield } from 'lucide-react';
+import { incrementView, getViewCount } from '../../../utils/viewCounter';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects', ({ data }) => {
@@ -44,6 +44,10 @@ const categoryIcons = {
   music: '🎵',
   video: '🎬'
 };
+
+const pageId = `projects-${project.data.category}-${project.slug.split('/').pop()}`;
+const viewCount = await incrementView(pageId);
+const currentViewCount = await getViewCount(pageId);
 ---
 
 <Layout 
@@ -89,7 +93,7 @@ const categoryIcons = {
           </span>
           <span class="flex items-center">
             <Eye className="w-4 h-4 mr-2" />
-            {project.data.views} views
+            {currentViewCount} views
           </span>
         </div>
 

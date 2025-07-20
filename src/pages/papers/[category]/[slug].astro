@@ -2,6 +2,7 @@
 import Layout from '../../../layouts/Layout.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { Clock, Eye, Calendar, Tag } from 'lucide-react';
+import { incrementView, getViewCount } from '../../../utils/viewCounter';
 
 export async function getStaticPaths() {
   const papers = await getCollection('papers', ({ data }) => {
@@ -47,6 +48,10 @@ const categoryIcons = {
   artikel: '📰',
   cerpen: '🔥'
 };
+
+const pageId = `papers-${paper.data.category}-${paper.slug.split('/').pop()}`;
+const viewCount = await incrementView(pageId);
+const currentViewCount = await getViewCount(pageId);
 ---
 
 <Layout 
@@ -107,7 +112,7 @@ const categoryIcons = {
           
           <span class="flex items-center">
             <Eye className="w-4 h-4 mr-2" />
-            {paper.data.views} views
+            {currentViewCount} views
           </span>
         </div>
 

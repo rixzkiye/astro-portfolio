@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const policies = await getCollection('policies');
+  return policies.map(policy => ({
+    params: { slug: policy.slug },
+    props: { policy },
+  }));
+}
+
+const { policy } = Astro.props;
+const { Content } = await policy.render();
+---
+
+<Layout title={policy.data.title} description={policy.data.description}>
+  <article class="py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto prose prose-lg dark:prose-invert max-w-none">
+      <header class="mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold text-light-text dark:text-dark-text mb-4">
+          {policy.data.title}
+        </h1>
+        <p class="text-xl text-light-muted dark:text-dark-muted mb-6">
+          {policy.data.description}
+        </p>
+      </header>
+      <Content />
+    </div>
+  </article>
+</Layout>
+
+<style is:global>
+  .prose {
+    @apply text-light-text dark:text-dark-text transition-all;
+  }
+  .prose h1, .prose h2, .prose h3 {
+    @apply font-bold tracking-tight;
+  }
+  .prose a {
+    @apply transition-colors hover:text-light-accent dark:hover:text-dark-accent;
+  }
+  .prose blockquote {
+    @apply border-l-4 border-light-accent dark:border-dark-accent italic pl-4;
+  }
+  .prose code {
+    @apply bg-light-surface dark:bg-dark-surface px-1 py-0.5 rounded text-sm;
+  }
+  .prose pre {
+    @apply bg-light-surface dark:bg-dark-surface rounded-lg overflow-auto;
+  }
+</style>
