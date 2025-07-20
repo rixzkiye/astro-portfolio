@@ -2,547 +2,241 @@
 // src/pages/pustaka.astro
 import Layout from "../layouts/Layout.astro";
 import { getCollection } from "astro:content";
-import ProjectCard from "../components/ProjectCard.astro";
-import PaperCard from "../components/PaperCard.astro";
+
+// Import komponen Pagination dan CardContainer
+import Pagination from "../components/Pagination.astro";
+import CardContainer from "../components/CardContainer.tsx"; // Import komponen CardContainer React
 
 // --- Data Fetching & Processing ---
+// Fetch all published projects and papers
 const projects = await getCollection(
-  "projects",
-  ({ data }) => data.status === "published"
+  "projects",
+  ({ data }) => data.status === "published"
 );
 const papers = await getCollection(
-  "papers",
-  ({ data }) => data.status === "published"
+  "papers",
+  ({ data }) => data.status === "published"
 );
 
+// Combine and sort all content by date (newest first)
 const allContent = [
-  ...projects.map((item) => ({ ...item, type: "project" as const })),
-  ...papers.map((item) => ({ ...item, type: "paper" as const })),
+  ...projects.map((item) => ({ ...item, type: "project" as const })),
+  ...papers.map((item) => ({ ...item, type: "paper" as const })),
 ].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
+// Featured content dan category counts (untuk statistik jika perlu di masa depan)
 const featuredContent = allContent.filter((item) => item.data.featured);
-
 const categoryCounts = allContent.reduce(
-  (acc, item) => {
-    const category = item.data.category;
-    if (category) {
-      acc[category] = (acc[category] || 0) + 1;
-    }
-    return acc;
-  },
-  {} as Record<string, number>
+  (acc, item) => {
+    const category = item.data.category;
+    if (category) {
+      acc[category] = (acc[category] || 0) + 1;
+    }
+    return acc;
+  },
+  {} as Record<string, number>
 );
-
 const stats = {
-  totalProjects: projects.length,
-  totalPapers: papers.length,
-  totalContent: allContent.length,
-  categories: {
-    code: categoryCounts.code || 0,
-    music: categoryCounts.music || 0,
-    video: categoryCounts.video || 0,
-    esai: categoryCounts.esai || 0,
-    puisi: categoryCounts.puisi || 0,
-    artikel: categoryCounts.artikel || 0,
-    cerpen: categoryCounts.cerpen || 0,
-  },
+  totalProjects: projects.length,
+  totalPapers: papers.length,
+  totalContent: allContent.length,
+  categories: {
+    code: categoryCounts.code || 0,
+    music: categoryCounts.music || 0,
+    video: categoryCounts.video || 0,
+    esai: categoryCounts.esai || 0,
+    puisi: categoryCounts.puisi || 0,
+    artikel: categoryCounts.artikel || 0,
+    cerpen: categoryCounts.cerpen || 0,
+  },
 };
+
+
+// Define items per page for pagination (gunakan jumlah yang sama dengan projects/papers)
+const itemsPerPage = 9; // Anda bisa menyesuaikan angka ini
+
+// --- getStaticPaths for Pagination ---
+export async function getStaticPaths() {
+  const projects = await getCollection("projects", ({ data }) => data.status === "published");
+  const papers = await getCollection("papers", ({ data }) => data.status === "published");
+
+  const allContent = [
+    ...projects.map((item) => ({ ...item, type: "project" as const })),
+    ...papers.map((item) => ({ ...item, type: "paper" as const })),
+  ].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+  const itemsPerPage = 9; // Match the number above
+
+  // Paginate the combined content
+  const totalPages = Math.ceil(allContent.length / itemsPerPage);
+  const paths = [];
+
+  for (let i = 1; i <= totalPages; i++) {
+    paths.push({
+      params: { page: i.toString() }, // Slug will be /pustaka/1, /pustaka/2, etc.
+      props: {
+        currentPage: i,
+        totalPages: totalPages,
+        // Pass only the items for the current page
+         // Konversi data Astro Collection ke objek JavaScript biasa
+        paginatedItems: allContent.slice(
+          (i - 1) * itemsPerPage,
+          i * itemsPerPage
+        ).map(item => ({
+            ...item.data,
+            slug: item.slug,
+            type: item.type,
+            date: item.data.date ? item.data.date.toISOString() : undefined,
+            externalLink: item.data.externalLink || undefined,
+            githubLink: item.data.githubLink || undefined,
+            youtubeLink: item.data.youtubeLink || undefined,
+            spotifyLink: item.data.spotifyLink || undefined,
+            pdfUrl: item.data.pdfUrl || undefined,
+            readTime: item.data.readTime || undefined,
+            featured: item.data.featured || false,
+            category: item.data.category || 'unknown',
+            tags: item.data.tags || [],
+            thumbnail: item.data.thumbnail || undefined,
+        })),
+      },
+    });
+  }
+
+  // Add a path for the first page without a number slug (/pustaka/)
+   paths.push({
+       params: { page: undefined },
+       props: {
+           currentPage: 1,
+           totalPages: totalPages,
+           paginatedItems: allContent.slice(0, itemsPerPage).map(item => ({
+               ...item.data,
+               slug: item.slug,
+               type: item.type,
+               date: item.data.date ? item.data.date.toISOString() : undefined,
+               externalLink: item.data.externalLink || undefined,
+               githubLink: item.data.githubLink || undefined,
+               youtubeLink: item.data.youtubeLink || undefined,
+               spotifyLink: item.data.spotifyLink || undefined,
+               pdfUrl: item.data.pdfUrl || undefined,
+               readTime: item.data.readTime || undefined,
+               featured: item.data.featured || false,
+               category: item.data.category || 'unknown',
+               tags: item.data.tags || [],
+               thumbnail: item.data.thumbnail || undefined,
+           })),
+       }
+   });
+
+  return paths;
+}
+
+// --- Props for the current page ---
+type Props = {
+  currentPage: number;
+  totalPages: number;
+  paginatedItems: any[];
+};
+
+const { currentPage, totalPages, paginatedItems } = Astro.props;
+
+// Konversi string tanggal ISO kembali menjadi objek Date di sisi klien
+const itemsWithDateObjects = paginatedItems.map(item => ({
+    ...item,
+    date: item.date && typeof item.date === 'string' ? new Date(item.date) : undefined
+}));
+
+
 ---
 
 <Layout
-  title="Library - My Work"
-  description="Explore the complete collection of my projects and writings. Find new inspiration and insights from all my creative and intellectual work."
+  title={`Library - Page ${currentPage} - My Work`}
+  description="Explore the complete collection of my projects and writings. Find new inspiration and insights from all my creative and intellectual work."
 >
-  <!-- Hero Section -->
-  <section class="relative py-24 px-4 sm:px-6 lg:px-8">
-    <div
-      class="absolute inset-0 -z-10 bg-light-background dark:bg-dark-background"
-    >
-      <div
-        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-light-accent/10 dark:bg-dark-accent/10 rounded-full filter blur-3xl animate-pulse"
-      >
-      </div>
-      <div
-        class="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-500/5 rounded-full filter blur-3xl animate-pulse"
-        style="animation-delay: 2s;"
-      >
-      </div>
-      <div
-        class="absolute bottom-1/4 right-1/4 w-72 h-72 bg-purple-500/5 rounded-full filter blur-3xl animate-pulse"
-        style="animation-delay: 4s;"
-      >
-      </div>
-    </div>
-    <div class="max-w-4xl mx-auto text-center">
-      <h1
-        class="text-4xl md:text-6xl font-bold text-light-text dark:text-dark-text mb-6"
-      >
-        Digital <span class="text-gradient">Library</span>
-      </h1>
-      <p
-        class="text-xl text-light-muted dark:text-dark-muted max-w-2xl mx-auto mb-8"
-      >
-        Explore the complete collection of my work - from tech projects to creative writings.
-      </p>
+  {/* --- Hero Section --- */}
+  <section class="relative py-24 px-4 sm:px-6 lg:px-8">
+    <div
+      class="absolute inset-0 -z-10 bg-light-background dark:bg-dark-background"
+    >
+      {/* Floating Elements */}
+      <div
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-light-accent/10 dark:bg-dark-accent/10 rounded-full filter blur-3xl animate-pulse"
+      ></div>
+      <div
+        class="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-500/5 rounded-full filter blur-3xl animate-pulse"
+        style="animation-delay: 2s;"
+      ></div>
+      <div
+        class="absolute bottom-1/4 right-1/4 w-72 h-72 bg-purple-500/5 rounded-full filter blur-3xl animate-pulse"
+        style="animation-delay: 4s;"
+      ></div>
+    </div>
+    <div class="max-w-4xl mx-auto text-center">
+      <h1
+        class="text-4xl md:text-6xl font-bold text-light-text dark:text-dark-text mb-6"
+      >
+        Digital <span class="text-gradient">Library</span>
+      </h1>
+      <p
+        class="text-xl text-light-muted dark:text-dark-muted max-w-2xl mx-auto mb-8"
+      >
+        Explore the complete collection of my work - from tech projects to creative writings.
+      </p>
 
-      <!-- Search Container -->
-      <div id="search-container" class="relative max-w-2xl mx-auto z-50">
-        <div class="relative flex items-center w-full">
-          <div
-            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10"
-          >
-            <svg
-              class="h-5 w-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              ><path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg
-            >
-          </div>
-          <input
-            type="text"
-            id="search-input"
-            placeholder="Search by title, description, or tag..."
-            class="w-full pl-12 pr-12 py-3 rounded-lg border border-light-border/50 dark:border-dark-border/50 bg-light-surface/50 dark:bg-dark-surface/50 backdrop-blur-sm focus:ring-2 focus:ring-light-accent dark:focus:ring-dark-accent focus:outline-none transition-all"
-            autocomplete="off"
-          />
-          <button
-            id="filter-toggle-btn"
-            class="absolute inset-y-0 right-0 px-4 flex items-center text-light-muted dark:text-dark-muted hover:text-light-text dark:hover:text-dark-text transition-colors"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              ><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"
-              ></polygon></svg
-            >
-          </button>
-        </div>
+      {/* --- Search Container (Dihapus) --- */}
+      {/* Saya akan menghapus total elemen HTML dan script terkait search & filter */}
 
-        <!-- Filter Dropdown -->
-        <div
-          id="dynamic-filter-container"
-          class="absolute top-full right-0 mt-2 w-64 bg-light-surface/80 dark:bg-dark-surface/80 backdrop-blur-md border border-light-border/50 dark:border-dark-border/50 rounded-lg shadow-2xl p-4 transition-all duration-300 ease-in-out opacity-0 scale-95 -translate-y-2 pointer-events-none z-[100]"
-        >
-          <p
-            class="text-sm font-semibold text-left mb-3 px-2 text-light-text dark:text-dark-text"
-          >
-            Filter by type
-          </p>
-          <div class="flex flex-col gap-1" id="dynamic-filter-tabs">
-            <button class="filter-btn w-full text-left py-2 px-3 rounded-md transition-colors font-medium text-[var(--color-text-muted)] hover:bg-[rgba(var(--color-accent-rgb),0.1)] hover:text-[var(--color-text)]" data-filter="all"
-              >All ({stats.totalContent})</button
-            >
-            <button class="filter-btn w-full text-left py-2 px-3 rounded-md transition-colors font-medium text-[var(--color-text-muted)] hover:bg-[rgba(var(--color-accent-rgb),0.1)] hover:text-[var(--color-text)]" data-filter="project"
-              >Projects ({stats.totalProjects})</button
-            >
-            <button class="filter-btn w-full text-left py-2 px-3 rounded-md transition-colors font-medium text-[var(--color-text-muted)] hover:bg-[rgba(var(--color-accent-rgb),0.1)] hover:text-[var(--color-text)]" data-filter="paper"
-              >Writings ({stats.totalPapers})</button
-            >
-            <button class="filter-btn w-full text-left py-2 px-3 rounded-md transition-colors font-medium text-[var(--color-text-muted)] hover:bg-[rgba(var(--color-accent-rgb),0.1)] hover:text-[var(--color-text)]" data-filter="featured"
-              >Featured ({featuredContent.length})</button
-            >
-          </div>
-        </div>
+    </div>
+  </section>
 
-        <!-- Search Results Preview -->
-        <div
-          id="search-results-preview"
-          class="absolute top-full left-0 right-0 mt-2 bg-light-surface/80 dark:bg-dark-surface/80 backdrop-blur-md border border-light-border/50 dark:border-dark-border/50 rounded-lg shadow-2xl overflow-hidden text-left transition-all duration-200 ease-in-out opacity-0 scale-95 pointer-events-none z-90"
-        >
-        </div>
-      </div>
-    </div>
-  </section>
+  {/* --- Desktop Filter Buttons (Dihapus) --- */}
+  {/* ... */}
 
-  <!-- Desktop Filter Buttons -->
-  <section id="main-filter-section" class="px-4 sm:px-6 lg:px-8 mb-12 transition-all duration-500 ease-in-out">
-    <div class="max-w-7xl mx-auto">
-      <div id="main-filter-tabs" class="hidden md:flex flex-wrap justify-center gap-2 md:gap-4">
-        <button class="px-4 py-2 rounded-lg border transition-all duration-300 font-medium" data-filter="all">All ({stats.totalContent})</button>
-        <button class="px-4 py-2 rounded-lg border transition-all duration-300 font-medium" data-filter="project">Projects ({stats.totalProjects})</button>
-        <button class="px-4 py-2 rounded-lg border transition-all duration-300 font-medium" data-filter="paper">Writings ({stats.totalPapers})</button>
-        <button class="px-4 py-2 rounded-lg border transition-all duration-300 font-medium" data-filter="featured">Featured ({featuredContent.length})</button>
-      </div>
-    </div>
-  </section>
+  {/* --- Content Grid and View Toggle --- */}
+  <section class="px-4 sm:px-6 lg:px-8 pb-20">
+    <div class="max-w-7xl mx-auto">
 
-  <!-- Content Grid -->
-  <section class="px-4 sm:px-6 lg:px-8 pb-20">
-    <div class="max-w-7xl mx-auto">
-      <div
-        id="content-grid"
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-      >
-        {
-          allContent.map((item, index) => {
-            const searchableContent =
-              `${item.data.title} ${item.data.description} ${item.data.tags?.join(" ")}`.toLowerCase();
-            const href =
-              item.type === "project"
-                ? `/projects/${item.slug}`
-                : `/papers/${item.slug}`;
-            return (
-              <div
-                class="content-item"
-                style={`--animation-delay: ${index * 75}ms;`}
-                data-type={item.type}
-                data-category={item.data.category}
-                data-featured={String(item.data.featured)}
-                data-searchable-content={searchableContent}
-                data-title={item.data.title}
-                data-description={item.data.description}
-                data-slug={item.slug}
-                data-href={href}
-              >
-                {item.type === "project" ? (
-                  <ProjectCard {...item.data} slug={item.slug} />
-                ) : (
-                  <PaperCard {...item.data} slug={item.slug} />
-                )}
-              </div>
-            );
-          })
-        }
-      </div>
-      <div id="no-results" class="hidden text-center py-20">
-        <div class="text-6xl mb-4 animate-wiggle">🤷</div>
-        <h2 class="text-2xl font-bold">No Results Found</h2>
-        <p class="text-light-muted dark:text-dark-muted">Try using different keywords or filters.</p>
-      </div>
-    </div>
-  </section>
+      {/* --- Pustaka Grid/List (gunakan CardContainer React) --- */}
+      {/* CardContainer sekarang mencakup ViewToggle di dalamnya dan mengelola state tampilan */}
+      {/* Menggunakan client:load agar dijalankan di browser dan menerima props */}
+      <CardContainer client:load items={itemsWithDateObjects} itemType="content" />
 
-  <!-- Category Section -->
-  <section
-    class="py-20 px-4 sm:px-6 lg:px-8 bg-light-surface dark:bg-dark-surface"
-  >
-    <div class="max-w-7xl mx-auto">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl font-bold">Explore by Category</h2>
-        <p class="text-light-muted dark:text-dark-muted">Find content that matches your interests</p>
-      </div>
-      <div
-        id="category-filter-buttons"
-        class="flex space-x-4 lg:grid lg:grid-cols-7 lg:gap-6 lg:space-x-0 overflow-x-auto pb-4 -mx-4 px-4"
-        style="-webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none;"
-      >
-        <button
-          data-category-filter="code"
-          class="category-btn flex-shrink-0 w-36 lg:w-auto p-6 rounded-xl text-center bg-light-background dark:bg-dark-background border border-light-border dark:border-dark-border transition-all duration-300 ease-in-out hover:scale-105 hover:border-light-accent dark:hover:border-dark-accent hover:shadow-xl hover:shadow-light-accent/10 dark:hover:shadow-dark-accent/10"
-          ><div class="text-3xl mb-2">💻</div><div class="font-semibold">
-            Code
-          </div><div class="text-sm text-light-muted dark:text-dark-muted">
-            {stats.categories.code}
-          </div></button
-        >
-        <button
-          data-category-filter="music"
-          class="category-btn flex-shrink-0 w-36 lg:w-auto p-6 rounded-xl text-center bg-light-background dark:bg-dark-background border border-light-border dark:border-dark-border transition-all duration-300 ease-in-out hover:scale-105 hover:border-light-accent dark:hover:border-dark-accent hover:shadow-xl hover:shadow-light-accent/10 dark:hover:shadow-dark-accent/10"
-          ><div class="text-3xl mb-2">🎵</div><div class="font-semibold">
-            Music
-          </div><div class="text-sm text-light-muted dark:text-dark-muted">
-            {stats.categories.music}
-          </div></button
-        >
-        <button
-          data-category-filter="video"
-          class="category-btn flex-shrink-0 w-36 lg:w-auto p-6 rounded-xl text-center bg-light-background dark:bg-dark-background border border-light-border dark:border-dark-border transition-all duration-300 ease-in-out hover:scale-105 hover:border-light-accent dark:hover:border-dark-accent hover:shadow-xl hover:shadow-light-accent/10 dark:hover:shadow-dark-accent/10"
-          ><div class="text-3xl mb-2">🎬</div><div class="font-semibold">
-            Video
-          </div><div class="text-sm text-light-muted dark:text-dark-muted">
-            {stats.categories.video}
-          </div></button
-        >
-        <button
-          data-category-filter="esai"
-          class="category-btn flex-shrink-0 w-36 lg:w-auto p-6 rounded-xl text-center bg-light-background dark:bg-dark-background border border-light-border dark:border-dark-border transition-all duration-300 ease-in-out hover:scale-105 hover:border-light-accent dark:hover:border-dark-accent hover:shadow-xl hover:shadow-light-accent/10 dark:hover:shadow-dark-accent/10"
-          ><div class="text-3xl mb-2">📄</div><div class="font-semibold">
-            Essays
-          </div><div class="text-sm text-light-muted dark:text-dark-muted">
-            {stats.categories.esai}
-          </div></button
-        >
-        <button
-          data-category-filter="puisi"
-          class="category-btn flex-shrink-0 w-36 lg:w-auto p-6 rounded-xl text-center bg-light-background dark:bg-dark-background border border-light-border dark:border-dark-border transition-all duration-300 ease-in-out hover:scale-105 hover:border-light-accent dark:hover:border-dark-accent hover:shadow-xl hover:shadow-light-accent/10 dark:hover:shadow-dark-accent/10"
-          ><div class="text-3xl mb-2">✨</div><div class="font-semibold">
-            Poetry
-          </div><div class="text-sm text-light-muted dark:text-dark-muted">
-            {stats.categories.puisi}
-          </div></button
-        >
-        <button
-          data-category-filter="artikel"
-          class="category-btn flex-shrink-0 w-36 lg:w-auto p-6 rounded-xl text-center bg-light-background dark:bg-dark-background border border-light-border dark:border-dark-border transition-all duration-300 ease-in-out hover:scale-105 hover:border-light-accent dark:hover:border-dark-accent hover:shadow-xl hover:shadow-light-accent/10 dark:hover:shadow-dark-accent/10"
-          ><div class="text-3xl mb-2">📰</div><div class="font-semibold">
-            Articles
-          </div><div class="text-sm text-light-muted dark:text-dark-muted">
-            {stats.categories.artikel}
-          </div></button
-        >
-        <button
-          data-category-filter="cerpen"
-          class="category-btn flex-shrink-0 w-36 lg:w-auto p-6 rounded-xl text-center bg-light-background dark:bg-dark-background border border-light-border dark:border-dark-border transition-all duration-300 ease-in-out hover:scale-105 hover:border-light-accent dark:hover:border-dark-accent hover:shadow-xl hover:shadow-light-accent/10 dark:hover:shadow-dark-accent/10"
-          ><div class="text-3xl mb-2">🔥</div><div class="font-semibold">
-            Short Stories
-          </div><div class="text-sm text-light-muted dark:text-dark-muted">
-            {stats.categories.cerpen}
-          </div></button
-        >
-      </div>
-    </div>
-  </section>
-  
-  <!-- Stats Section -->
-  <section
-    id="stats-section"
-    class="px-4 sm:px-6 lg:px-8 py-20"
-  >
-    <div class="max-w-7xl mx-auto">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-        <div
-          class="p-6 rounded-xl text-center bg-light-surface/50 dark:bg-dark-surface/50 border border-light-border/50 dark:border-dark-border/50 backdrop-blur-sm transition hover:bg-light-surface dark:hover:bg-dark-surface"
-        >
-          <div
-            class="text-3xl font-bold text-light-accent dark:text-dark-accent mb-2"
-          >
-            {stats.totalContent}
-          </div><div class="text-sm text-light-muted dark:text-dark-muted">
-            Total Works
-          </div>
-        </div>
-        <div
-          class="p-6 rounded-xl text-center bg-light-surface/50 dark:bg-dark-surface/50 border border-light-border/50 dark:border-dark-border/50 backdrop-blur-sm transition hover:bg-light-surface dark:hover:bg-dark-surface"
-        >
-          <div
-            class="text-3xl font-bold text-light-accent dark:text-dark-accent mb-2"
-          >
-            {stats.totalProjects}
-          </div><div class="text-sm text-light-muted dark:text-dark-muted">
-            Projects
-          </div>
-        </div>
-        <div
-          class="p-6 rounded-xl text-center bg-light-surface/50 dark:bg-dark-surface/50 border border-light-border/50 dark:border-dark-border/50 backdrop-blur-sm transition hover:bg-light-surface dark:hover:bg-dark-surface"
-        >
-          <div
-            class="text-3xl font-bold text-light-accent dark:text-dark-accent mb-2"
-          >
-            {stats.totalPapers}
-          </div><div class="text-sm text-light-muted dark:text-dark-muted">
-            Writings
-          </div>
-        </div>
-        <div
-          class="p-6 rounded-xl text-center bg-light-surface/50 dark:bg-dark-surface/50 border border-light-border/50 dark:border-dark-border/50 backdrop-blur-sm transition hover:bg-light-surface dark:hover:bg-dark-surface"
-        >
-          <div
-            class="text-3xl font-bold text-light-accent dark:text-dark-accent mb-2"
-          >
-            {featuredContent.length}
-          </div><div class="text-sm text-light-muted dark:text-dark-muted">
-            Featured
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+
+      {/* --- Pagination --- */}
+       <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/pustaka/" />
+
+      {/* --- Empty State (Adapt for pagination) --- */}
+       {paginatedItems.length === 0 && (
+           <div class="text-center py-20">
+               <div class="text-6xl mb-4">🤷</div>
+               <h2 class="text-2xl font-bold text-light-text dark:text-dark-text">No Content Found</h2>
+               <p class="text-light-muted dark:text-dark-muted">It seems there is no content available on this page.</p>
+           </div>
+       )}
+
+    </div>
+  </section>
+
+  {/* --- Category Section (Dihapus) --- */}
+   {/* ... */}
+
+  {/* --- Stats Section (Dihapus) --- */}
+   {/* ... */}
+
 </Layout>
 
+{/* --- CSS Global --- */}
+{/* CSS untuk tata letak container dan item di dalam CardContainer ditangani oleh komponen itu sendiri */}
+{/* Anda mungkin perlu CSS global di sini jika ada gaya yang menimpa atau perlu disesuaikan di luar CardContainer */}
 <style is:global>
-  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes wiggle { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
-  .animate-wiggle { animation: wiggle 0.5s ease-in-out infinite; }
-  .content-item { animation: fadeInUp 0.6s ease-out forwards; animation-delay: var(--animation-delay, 0ms); opacity: 0; }
-  .content-item.hidden { display: none; }
-  mark { background-color: var(--color-accent-transparent); color: var(--color-accent); padding: 1px 2px; border-radius: 3px; }
-  #dynamic-filter-container.visible, #search-results-preview.visible { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
-  .preview-item { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; transition: background-color 0.2s ease-in-out; text-decoration: none; color: inherit; }
-  .preview-item:hover { background-color: rgba(var(--color-accent-rgb), 0.1); }
-  .preview-item:not(:last-child) { border-bottom: 1px solid var(--color-border); }
-  .preview-item__icon { flex-shrink: 0; width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; display: grid; place-items: center; background-color: rgba(var(--color-accent-rgb), 0.08); }
-  .preview-item__icon svg { width: 1.25rem; height: 1.25rem; color: var(--color-accent); }
-  .preview-item__content { flex-grow: 1; overflow: hidden; }
-  .preview-item__title { font-weight: 600; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .preview-item__desc { font-size: 0.875rem; color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .section-hidden { display: none !important; }
+   /* Aturan default untuk grid (sudah ada di CardContainer className={viewMode === 'grid' ? gridClasses : listClasses}) */
+    /* grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 */
+
+    /* Aturan untuk list view (sudah ada di CardContainer) */
+    /* flex flex-col gap-6 */
+
+    /* CSS tambahan jika diperlukan untuk mengatasi styling global */
+    /* Misalnya, jika .content-item-project atau .content-item-paper perlu override global styles */
 </style>
 
-<script is:inline>
- document.addEventListener("DOMContentLoaded", () => {
-    const searchContainer = document.getElementById("search-container");
-    const searchInput = document.getElementById("search-input");
-    const filterToggleButton = document.getElementById("filter-toggle-btn");
-    const dynamicFilterContainer = document.getElementById("dynamic-filter-container");
-    const searchResultsPreview = document.getElementById("search-results-preview");
-    const mainFilterSection = document.getElementById("main-filter-section");
-    const mainFilterTabs = document.getElementById("main-filter-tabs");
-    const dynamicFilterTabs = document.getElementById("dynamic-filter-tabs");
-    const categoryButtonContainer = document.getElementById("category-filter-buttons");
-    const contentItems = document.querySelectorAll(".content-item");
-    const noResults = document.getElementById("no-results");
-    
-    if (!searchContainer || !searchInput || !dynamicFilterTabs || !mainFilterTabs || !categoryButtonContainer) return;
-
-    let currentTypeFilter = "all";
-    let currentCategoryFilter = "all";
-    let currentSearch = "";
-
-    const searchableData = Array.from(contentItems).map(item => {
-        const el = item;
-        return {
-            title: el.dataset.title ?? '',
-            description: el.dataset.description ?? '',
-            searchableContent: el.dataset.searchableContent ?? '',
-            href: el.dataset.href ?? '#',
-            type: el.dataset.type ?? '',
-            element: el,
-        }
-    });
-
-    const highlightText = (text, query) => {
-        if (!query || !text) return text;
-        const regex = new RegExp(`(${query.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")})`, "gi");
-        return text.replace(regex, `<mark>$1</mark>`);
-    };
-
-    const applyFilters = () => {
-        let visibleCount = 0;
-        const isSearching = currentSearch !== "";
-        
-        mainFilterSection?.classList.toggle("section-hidden", isSearching);
-
-        contentItems.forEach((item) => {
-            const el = item;
-            const type = el.dataset.type ?? '';
-            const category = el.dataset.category ?? '';
-            const isFeatured = el.dataset.featured === "true";
-            const searchableContent = el.dataset.searchableContent ?? '';
-
-            const typeMatch = currentTypeFilter === 'all' || (currentTypeFilter === 'featured' ? isFeatured : type === currentTypeFilter);
-            const categoryMatch = currentCategoryFilter === 'all' || category === currentCategoryFilter;
-            const searchMatch = !currentSearch || searchableContent.includes(currentSearch);
-            
-            const showItem = typeMatch && categoryMatch && searchMatch;
-            el.classList.toggle("hidden", !showItem);
-            if (showItem) visibleCount++;
-        });
-        noResults?.classList.toggle("hidden", visibleCount > 0);
-    };
-
-    const updateSearchPreview = () => {
-        if (!searchResultsPreview || !searchInput.value) {
-            searchResultsPreview?.classList.remove("visible");
-            return;
-        }
-        const query = searchInput.value.toLowerCase();
-        if (query.length < 2) {
-            searchResultsPreview.classList.remove("visible");
-            return;
-        }
-        const filteredResults = searchableData.filter(item => item.searchableContent.includes(query)).slice(0, 5);
-        if (filteredResults.length > 0) {
-            searchResultsPreview.innerHTML = filteredResults.map(item => {
-                const icon = item.type === "project"
-                    ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>`
-                    : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
-                return `<a href="${item.href}" class="preview-item"><div class="preview-item__icon">${icon}</div><div class="preview-item__content"><div class="preview-item__title">${highlightText(item.title, query)}</div><div class="preview-item__desc">${item.description}</div></div></a>`;
-            }).join("");
-            searchResultsPreview.classList.add("visible");
-        } else {
-            searchResultsPreview.classList.remove("visible");
-        }
-    };
-    
-    const syncActiveFilterState = (activeFilter) => {
-        const activeClasses = ['bg-light-accent', 'dark:bg-dark-accent', 'text-white', 'border-transparent'];
-        const inactiveClasses = ['text-light-muted', 'dark:text-dark-muted', 'hover:text-light-text', 'dark:hover:text-dark-text', 'hover:bg-light-surface', 'dark:hover:bg-dark-surface', 'border-light-border', 'dark:border-dark-border'];
-
-        mainFilterTabs.querySelectorAll("button").forEach(b => {
-            b.classList.remove(...activeClasses, ...inactiveClasses);
-            b.classList.add(...(b.dataset.filter === activeFilter ? activeClasses : inactiveClasses));
-        });
-        dynamicFilterTabs.querySelectorAll("button").forEach(b => {
-            b.classList.toggle('active', b.dataset.filter === activeFilter);
-            b.classList.toggle('bg-[var(--color-accent)]', b.dataset.filter === activeFilter);
-            b.classList.toggle('text-white', b.dataset.filter === activeFilter);
-            b.classList.toggle('font-semibold', b.dataset.filter === activeFilter);
-        });
-    };
-
-    filterToggleButton?.addEventListener("click", (e) => {
-        e.stopPropagation();
-        dynamicFilterContainer?.classList.toggle("visible");
-    });
-
-    searchInput.addEventListener("input", () => {
-        currentSearch = searchInput.value.toLowerCase();
-        applyFilters();
-        updateSearchPreview();
-    });
-
-    searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            searchResultsPreview?.classList.remove('visible');
-        }
-    });
-
-    document.addEventListener("click", (e) => {
-        if (e.target instanceof Node && !searchContainer.contains(e.target)) {
-            dynamicFilterContainer?.classList.remove("visible");
-            searchResultsPreview?.classList.remove("visible");
-        }
-    });
-
-    const handleFilterClick = (e) => {
-        const target = e.target.closest("button");
-        if (!target || !searchInput) return;
-        currentTypeFilter = target.dataset.filter ?? 'all';
-        currentCategoryFilter = "all";
-        searchInput.value = "";
-        currentSearch = "";
-        searchResultsPreview?.classList.remove("visible");
-        syncActiveFilterState(currentTypeFilter);
-        applyFilters();
-        dynamicFilterContainer?.classList.remove("visible");
-    };
-
-    mainFilterTabs.addEventListener("click", handleFilterClick);
-    dynamicFilterTabs.addEventListener("click", handleFilterClick);
-
-    categoryButtonContainer.addEventListener("click", (e) => {
-        const btn = e.target.closest(".category-btn");
-        if (!btn || !searchInput) return;
-
-        currentCategoryFilter = btn.dataset.categoryFilter ?? 'all';
-        currentTypeFilter = "all"; // Reset type filter
-        searchInput.value = "";
-        currentSearch = "";
-        searchResultsPreview?.classList.remove("visible");
-        
-        // Visually reset main filters
-        syncActiveFilterState('all'); 
-        
-        // Scroll to the content grid smoothly
-        const contentGrid = document.getElementById('content-grid');
-        contentGrid?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        applyFilters();
-    });
-
-    syncActiveFilterState("all");
-    applyFilters();
-});
-</script>
+ {/* --- Client-side Script (Dihapus) --- */}
+ {/* Saya akan menghapus total script inline lama terkait search & filter */}

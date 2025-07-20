@@ -2,29 +2,160 @@
 // src/pages/projects.astro
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
-import SearchFilter from '../components/SearchFilter.astro';
 
-type CategoryKey = 'code' | 'music' | 'video';
+// Import komponen Pagination dan CardContainer
+import Pagination from "../components/Pagination.astro";
+import CardContainer from "../components/CardContainer.tsx"; // Import komponen CardContainer React
 
-const projects = await getCollection('projects', ({ data }) => data.status === 'published');
-const sortedProjects = projects.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-const categories: { key: CategoryKey; name: string; icon: string; }[] = [
- { key: 'code', name: 'Code', icon: '💻' },
- { key: 'music', name: 'Music', icon: '🎵' },
- { key: 'video', name: 'Video', icon: '🎬' },
-];
+// Fetch all published projects
+const allProjects = await getCollection('projects', ({ data }) => data.status === 'published');
+const sortedProjects = allProjects.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+
+// Define items per page for pagination
+const itemsPerPage = 9; // Anda bisa menyesuaikan angka ini
+
+// --- getStaticPaths for Pagination ---
+export async function getStaticPaths() {
+  const projects = await getCollection('projects', ({ data }) => data.status === 'published');
+  const sortedProjects = projects.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+  const itemsPerPage = 9; // Match the number above
+
+  // Paginate the projects
+  const totalPages = Math.ceil(sortedProjects.length / itemsPerPage);
+  const paths = [];
+
+  for (let i = 1; i <= totalPages; i++) {
+    paths.push({
+      params: { page: i.toString() }, // Slug will be /projects/1, /projects/2, etc.
+      props: {
+        currentPage: i,
+        totalPages: totalPages,
+        // Pass only the items for the current page
+        // Konversi data Astro Collection ke objek JavaScript biasa agar mudah di-pass ke komponen React
+        paginatedItems: sortedProjects.slice( // Ubah nama prop menjadi paginatedItems
+          (i - 1) * itemsPerPage,
+          i * itemsPerPage
+        ).map(item => ({
+            ...item.data,
+            slug: item.slug,
+            type: 'project' as const,
+            date: item.data.date ? item.data.date.toISOString() : undefined,
+            externalLink: item.data.externalLink || undefined,
+            githubLink: item.data.githubLink || undefined,
+            youtubeLink: item.data.youtubeLink || undefined,
+            spotifyLink: item.data.spotifyLink || undefined,
+            pdfUrl: item.data.pdfUrl || undefined,
+            readTime: item.data.readTime || undefined,
+            featured: item.data.featured || false,
+            category: item.data.category || 'unknown',
+            tags: item.data.tags || [],
+            thumbnail: item.data.thumbnail || undefined,
+        })),
+      },
+    });
+  }
+
+  // Add a path for the first page without a number slug (/projects/)
+   paths.push({
+       params: { page: undefined },
+       props: {
+           currentPage: 1,
+           totalPages: totalPages,
+           paginatedItems: sortedProjects.slice(0, itemsPerPage).map(item => ({
+               ...item.data,
+               slug: item.slug,
+               type: 'project' as const,
+               date: item.data.date ? item.data.date.toISOString() : undefined,
+               externalLink: item.data.externalLink || undefined,
+               githubLink: item.data.githubLink || undefined,
+               youtubeLink: item.data.youtubeLink || undefined,
+               spotifyLink: item.data.spotifyLink || undefined,
+               pdfUrl: item.data.pdfUrl || undefined,
+               readTime: item.data.readTime || undefined,
+               featured: item.data.featured || false,
+               category: item.data.category || 'unknown',
+               tags: item.data.tags || [],
+               thumbnail: item.data.thumbnail || undefined,
+           })),
+       }
+   });
+
+  return paths;
+}
+
+// --- Props for the current page ---
+type Props = {
+  currentPage: number;
+  totalPages: number;
+  paginatedItems: any[];
+};
+
+const { currentPage, totalPages, paginatedItems } = Astro.props;
+
+// Konversi string tanggal ISO kembali menjadi objek Date di sisi klien
+const itemsWithDateObjects = paginatedItems.map(item => ({
+    ...item,
+    date: item.date ? new Date(item.date) : undefined
+}));
+
+
+// --- Code for categories (keep for now, might be useful for future filtering) ---
+// type CategoryKey = 'code' | 'music' | 'video';
+// const categories: { key: CategoryKey; name: string; icon: string; }[] = [ ... ];
+
 ---
 
-<Layout 
- title="Projects - My Work"
- description="Explore my creative projects spanning code, music, and video."
+<Layout
+  title={`Projects - Page ${currentPage} - My Work`}
+  description="Explore my creative projects spanning code, music, and video."
 >
- <SearchFilter 
-  items={sortedProjects}
-  itemType="project"
-  placeholder="Search for projects by title, description, or tag..."
-  categories={categories}
-  allText="📁 All Projects"
- />
+  <section class="py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <h1 class="text-4xl md:text-6xl font-bold text-center text-light-text dark:text-dark-text mb-12">
+         My <span class="text-gradient">Projects</span>
+      </h1>
+
+      {/* --- Project Grid/List (gunakan CardContainer React) --- */}
+      {/* CardContainer sekarang mencakup ViewToggle di dalamnya dan mengelola state tampilan */}
+      {/* Menggunakan client:load agar dijalankan di browser dan menerima props */}
+      <CardContainer client:load items={itemsWithDateObjects} itemType="project" />
+
+
+      {/* --- Pagination --- */}
+       <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/projects/" />
+
+
+       {/* --- Empty State (Adapt for pagination) --- */}
+       {paginatedItems.length === 0 && (
+           <div class="text-center py-20">
+               <div class="text-6xl mb-4">📁</div>
+               <h2 class="text-2xl font-bold text-light-text dark:text-dark-text">No Projects Found</h2>
+               <p class="text-light-muted dark:text-dark-muted">It seems there are no projects available on this page.</p>
+           </div>
+       )}
+
+
+    </div>
+  </section>
+
+   {/* --- CSS Global --- */}
+   {/* CSS untuk tata letak container dan item di dalam CardContainer ditangani oleh komponen itu sendiri */}
+   {/* Anda mungkin perlu CSS global di sini jika ada gaya yang menimpa atau perlu disesuaikan di luar CardContainer */}
+   <style is:global>
+       /* Aturan default untuk grid (sudah ada di CardContainer className={viewMode === 'grid' ? gridClasses : listClasses}) */
+       /* grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 */
+
+       /* Aturan untuk list view (sudah ada di CardContainer) */
+       /* flex flex-col gap-6 */
+
+       /* CSS tambahan jika diperlukan untuk mengatasi styling global */
+       /* Misalnya, jika .content-item-project atau .content-item-paper perlu override global styles */
+   </style>
+
+    {/* --- Client-side Script (Tidak diperlukan lagi) --- */}
+
+
 </Layout>
